@@ -110,7 +110,8 @@ QString CitraholdServer::verifyTokenToSetUserID(QString fullToken)
 		// we got a token
 		// debug output
 		qDebug() << response.second["token"].toString();
-
+        // untested
+        this->token = fullToken;
 		return response.second["userID"].toString();
 	}
 	else
