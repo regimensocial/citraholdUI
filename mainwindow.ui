@@ -157,7 +157,7 @@
        <rect>
         <x>30</x>
         <y>240</y>
-        <width>251</width>
+        <width>250</width>
         <height>31</height>
        </rect>
       </property>
@@ -219,9 +219,9 @@
      <widget class="QPushButton" name="selectPreviousGameIDsButton">
       <property name="geometry">
        <rect>
-        <x>30</x>
+        <x>29</x>
         <y>270</y>
-        <width>251</width>
+        <width>252</width>
         <height>31</height>
        </rect>
       </property>
@@ -244,7 +244,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>24</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
