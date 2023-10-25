@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Launch",
+            "program": "${workspaceRoot}/build/main",
+            "args": [],
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": "C/C++: Clang build active file"
+        }
+    ],
+    "version": "2.0.0"
+}
