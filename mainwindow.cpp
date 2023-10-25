@@ -168,7 +168,7 @@ void MainWindow::openGameIDSelector() {
             gamePath.setDisabled(false);
             gameID.setPlainText(comboBox.currentText());
             gamePath.setPlainText(gameIDPaths[comboBox.currentIndex() - 1]);
-            label.setText(comboBox.currentText() + " points to " + gameIDPaths[comboBox.currentIndex() - 1]);
+            label.setText(comboBox.currentText() + " refers to \n" + gameIDPaths[comboBox.currentIndex() - 1]);
         }
     });
 
