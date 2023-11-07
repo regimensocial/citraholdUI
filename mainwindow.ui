@@ -265,7 +265,7 @@
       <property name="geometry">
        <rect>
         <x>440</x>
-        <y>200</y>
+        <y>240</y>
         <width>301</width>
         <height>32</height>
        </rect>
@@ -280,7 +280,7 @@
       <property name="geometry">
        <rect>
         <x>440</x>
-        <y>180</y>
+        <y>220</y>
         <width>311</width>
         <height>16</height>
        </rect>
@@ -296,38 +296,6 @@
       </property>
       <property name="text">
        <string>Game ID</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="downloadSaveComboBox">
-      <property name="geometry">
-       <rect>
-        <x>440</x>
-        <y>270</y>
-        <width>301</width>
-        <height>32</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_5">
-      <property name="geometry">
-       <rect>
-        <x>440</x>
-        <y>250</y>
-        <width>311</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <italic>false</italic>
-        <bold>false</bold>
-        <underline>false</underline>
-        <strikeout>false</strikeout>
-        <kerning>false</kerning>
-       </font>
-      </property>
-      <property name="text">
-       <string>Save ID</string>
       </property>
      </widget>
     </widget>
