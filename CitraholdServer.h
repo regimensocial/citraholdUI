@@ -5,6 +5,9 @@
 #include <QNetworkAccessManager>
 #include <QJsonDocument>
 #include <QObject>
+#include <QVector>
+#include <QHash>
+#include <filesystem>
 
 using responsePair = std::pair<int, QJsonDocument>;
 
@@ -28,7 +31,14 @@ public:
     // User ID is kind of useless, but it's a good way to verify the token
     QString verifyTokenToSetUserID(QString fullToken);
 
+    QJsonArray getGameIDsFromServer(UploadType type);
+    void updateServerGameIDVariables();
+
+    QVector<QString> serverGameIDSaves;
+    QVector<QString> serverGameIDExtdata;
+
     int upload(UploadType type, QString filePath, QString base64Data);
+    int download(UploadType type, QString gameID, std::filesystem::path gamePath);
 
 private:
     QString serverAddress;
@@ -37,7 +47,7 @@ private:
 
     void setTokenFromString(QString token); //
     // internal use only
-    responsePair sendRequest(QString address, QJsonObject* dataToSend = nullptr); //
+    responsePair sendRequest(QString address, QJsonObject* dataToSend = nullptr, QString* downloadPath = nullptr); //
 
 };
 

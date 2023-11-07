@@ -25,6 +25,8 @@ private slots:
 
     void handleDirectoryButton(bool openSelection = true);
     void handleUploadButton();
+    void handleServerFetch();
+    void handleDownloadButton();
 
 private:
     Ui::MainWindow *ui;

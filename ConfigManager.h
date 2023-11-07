@@ -18,6 +18,7 @@ public:
 
     std::filesystem::path getSaveDirectory() const;
     std::filesystem::path getLikelyCitraDirectory(UploadType type = UploadType::SAVES) const;
+    std::filesystem::path getOldSaveDirectory(UploadType type = UploadType::SAVES) const;
 
     void updateConfigFile(QJsonDocument newConfig);
     void setToken(QString token);
@@ -27,6 +28,9 @@ public:
 
     QJsonDocument getConfig() const;
     QString getToken() const;
+
+    std::filesystem::path getGamePathFromGameID(UploadType type, QString gameID);
+    bool copyDirectory(const std::filesystem::path& source, const std::filesystem::path& destination);
 
     QString userID;
 

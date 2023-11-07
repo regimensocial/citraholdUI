@@ -21,7 +21,7 @@
 #include <QVBoxLayout>
 #include <QComboBox>
 #include <QMessageBox>
-
+#include <QMap>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -64,6 +64,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     connect (ui->extdataRadio, &QRadioButton::clicked, this, &MainWindow::handleSaveExtdataRadios);
     connect (ui->saveRadio, &QRadioButton::clicked, this, &MainWindow::handleSaveExtdataRadios);
+    connect (ui->fetchButton, &QPushButton::clicked, this, &MainWindow::handleServerFetch);
+
+    connect(ui->downloadButton, &QPushButton::clicked, this, &MainWindow::handleDownloadButton);
 
     // MainWindow.cpp (in the constructor)
     //connect(configManager, &ConfigManager::checkTokenInConfig, this, &MainWindow::handleTokenInConfig);
@@ -76,12 +79,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     if (configManager->loggedIn()) {
         ui->stackedWidget->setCurrentIndex(1);
         ui->statusbar->showMessage("Logged in.");
+
+        handleServerFetch();
+
     } else {
         ui->stackedWidget->setCurrentIndex(0);
         // at some point, we'll need to check if the server is running
     }
 
-    changedNameOrDirectorySinceSetAutomatically = true;
+    changedNameOrDirectorySinceSetAutomatically = false;
 }
 
 MainWindow::~MainWindow()
@@ -331,7 +337,7 @@ void MainWindow::showErrorBox(QString error) {
     QMessageBox errorMessage;
     errorMessage.setIcon(QMessageBox::Critical);
     errorMessage.setWindowTitle("Error");
-    errorMessage.setText("An error has occurred.");
+    errorMessage.setText("An error has occurred.\n");
     if (error != "") {
         errorMessage.setText(errorMessage.text() + "\n" + error);
     }
@@ -404,7 +410,7 @@ void MainWindow::handleUploadButton() {
             QString base64Data = QString(fileData.toBase64());
 
             // CHPC means Citrahold PC, the one from the 3DS will have CHDS instead
-            responses.append(citraholdServer->upload(MainWindow::savesOrExtdata(), gameID + "/" + formattedDateTime + "-CHPC" + "/" + allFilesRelative.first().path(), base64Data));
+            responses.append(citraholdServer->upload(MainWindow::savesOrExtdata(), gameID + "/" + allFilesRelative.first().path(), base64Data));
 
         } else {
             // Handle the case where the file couldn't be opened
@@ -462,6 +468,64 @@ void MainWindow::addGameIDToFile() {
     }
 }
 
+void MainWindow::handleServerFetch() {
+    ui->downloadGameIDComboBox->clear();
+    citraholdServer->updateServerGameIDVariables();
+
+    QVector<QString>* serverGameIDs = (MainWindow::savesOrExtdata() == UploadType::SAVES) ? &citraholdServer->serverGameIDSaves : &citraholdServer->serverGameIDExtdata;
+
+    for (const QString &key : *serverGameIDs) {
+
+        ui->downloadGameIDComboBox->addItem(key);
+        qDebug() << "Key:" << key;
+
+    }
+}
+
+void MainWindow::handleDownloadButton() {
+
+    // ui->downloadGameIDComboBox->currentText()
+    //
+    QJsonArray gameIDsOnFile = configManager->getGameIDFile(MainWindow::savesOrExtdata())["gameID"].toArray();
+
+    for (int i = 0; i < gameIDsOnFile.size(); ++i) {
+        QJsonValue value = gameIDsOnFile.at(i);
+
+        bool gameIDpresent = false;
+
+        if (ui->downloadGameIDComboBox->currentText() == value[0].toString()) {
+            gameIDpresent = true;
+        }
+
+        if (!gameIDpresent) {
+            showErrorBox("You need to add " + ui->downloadGameIDComboBox->currentText() + " to your gameID list.");
+        } else {
+
+            QDateTime currentDateTime = QDateTime::currentDateTime();
+            QString formattedDateTime = currentDateTime.toString("yyyyMMdd-hhmmss");
+
+            configManager->copyDirectory(
+                configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()),
+                // clear oldSaveDirectory at some point
+                (configManager->getOldSaveDirectory(MainWindow::savesOrExtdata()) / std::filesystem::path ((ui->downloadGameIDComboBox->currentText() + "-" + formattedDateTime).toStdString()))
+            );
+
+            std::filesystem::remove_all(configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()));
+            if (!std::filesystem::exists(configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText())))
+            {
+                std::filesystem::create_directories(configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()));
+            }
+
+            citraholdServer->download(
+                MainWindow::savesOrExtdata(),
+                ui->downloadGameIDComboBox->currentText(),
+                configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText())
+            );
+        }
+    }
+
+}
+
 void MainWindow::handleSaveExtdataRadios() {
     // this is a particularly harsh way of stopping the user from accidentally sending extdata as saves or vice versa
 
@@ -470,4 +534,5 @@ void MainWindow::handleSaveExtdataRadios() {
         ui->directoryText->setPlainText(QString::fromStdString(configManager->getLikelyCitraDirectory(MainWindow::savesOrExtdata()).u8string()));
         ui->gameIDText->setPlainText("");
     }
+    handleServerFetch();
 }

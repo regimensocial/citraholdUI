@@ -1,4 +1,5 @@
 #include "CitraholdServer.h"
+#include "QtCore/qjsonarray.h"
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QUrl>
@@ -8,6 +9,7 @@
 #include <QJsonObject>
 #include <QEventLoop>
 #include <QObject>
+#include <QFile>
 
 CitraholdServer::CitraholdServer(QString serverAddress, QString token)
 {
@@ -21,7 +23,7 @@ void CitraholdServer::setTokenFromString(QString token)
 
 	this->token = token;
 }
-responsePair CitraholdServer::sendRequest(QString address, QJsonObject *dataToSend)
+responsePair CitraholdServer::sendRequest(QString address, QJsonObject *dataToSend, QString* downloadPath)
 {
 	QEventLoop eventLoop;
 
@@ -50,16 +52,34 @@ responsePair CitraholdServer::sendRequest(QString address, QJsonObject *dataToSe
 	eventLoop.exec();
 
 	if (reply->error() == QNetworkReply::NoError)
-	{
-		// The request was successfully made without network issues.
+    {
+        // The request was successfully made without network issues.
 
-		// Check the HTTP status code to determine the server's response.
+        // Check the HTTP status code to determine the server's response.
+        int httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
-		int httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-		QJsonDocument response = QJsonDocument::fromJson(reply->readAll());
-		delete reply;
+        // Check the Content-Type header to determine the response type
+        QVariant contentType = reply->header(QNetworkRequest::ContentTypeHeader);
 
-		return std::make_pair(httpStatusCode, response);
+        if (contentType.toString().startsWith("application/json")) {
+            // It's a JSON response
+            QJsonDocument response = QJsonDocument::fromJson(reply->readAll());
+            delete reply;
+            return std::make_pair(httpStatusCode, response);
+        } else if (downloadPath != nullptr) {
+            QFile file(*downloadPath);
+
+            if (file.open(QIODevice::WriteOnly)) {
+                file.write(reply->readAll());
+                file.close();
+                qDebug() << "Downloaded to" << *downloadPath;
+            } else {
+                qDebug() << "Failed to open file for writing.";
+            }
+
+            delete reply;
+            return std::make_pair(httpStatusCode, QJsonDocument());
+        }
 	}
 	else // actual connection error???
 	{
@@ -136,4 +156,72 @@ int CitraholdServer::upload(UploadType type, QString filePath, QString base64Dat
     // this will return a full token
     responsePair response = sendRequest(this->serverAddress + (type == UploadType::SAVES ? "/uploadSaves" : "/UploadExtdata"), &data);
     return response.first;
+}
+
+QJsonArray CitraholdServer::getGameIDsFromServer(UploadType type) {
+
+    QJsonObject data;
+
+    data["token"] = this->token;
+    responsePair response = sendRequest(this->serverAddress + (type == UploadType::SAVES ? "/getSaves" : "/getExtdata"), &data);
+
+
+    if (response.first == 200) {
+        return response.second["games"].toArray();
+    } else {
+        return {};
+    }
+
+}
+
+int CitraholdServer::download(UploadType type, QString gameID, std::filesystem::path gamePath) {
+    QJsonObject data;
+
+    data["token"] = this->token;
+    data["game"] = gameID;
+
+    responsePair response = sendRequest(this->serverAddress + (type == UploadType::SAVES ? "/downloadSaves" : "/downloadExtdata"), &data);
+
+    if (response.first == 200) {
+        QJsonArray files = response.second["files"].toArray();
+
+        for (int i = 0; i < files.size(); ++i) {
+
+            data["file"] = files.at(i).toString();
+
+            std::filesystem::path value = files.at(i).toString().toStdString();
+
+            QString downloadPath = QString::fromStdString((gamePath / value).string());
+
+            sendRequest(this->serverAddress + (type == UploadType::SAVES ? "/downloadSaves" : "/downloadExtdata"), &data, &downloadPath);
+        }
+
+    } else {
+        return 0;
+    }
+    return 0;
+}
+
+void CitraholdServer::updateServerGameIDVariables() {
+
+    QVector<QString>* serverGameID;
+    UploadType type;
+
+    for (int i = 0; i <= 1; ++i) {
+        if (i == 0) {
+            serverGameID = &serverGameIDSaves;
+            type = UploadType::SAVES;
+        } else {
+            serverGameID = &serverGameIDExtdata;
+            type = UploadType::EXTDATA;
+        }
+        serverGameID->clear();
+        QJsonArray gameIDs = CitraholdServer::getGameIDsFromServer(type);
+        for (int i = 0; i < gameIDs.size(); ++i) {
+            QJsonValue gameValue = gameIDs.at(i);
+            if (gameValue.isString()) {
+                serverGameID->append(gameValue.toString());
+            }
+        }
+    }
 }

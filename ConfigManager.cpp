@@ -199,6 +199,16 @@ void ConfigManager::initialise()
         std::filesystem::create_directories(saveDirectory);
     }
 
+    if (!std::filesystem::exists(saveDirectory / "oldSaves"))
+    {
+        std::filesystem::create_directories(saveDirectory / "oldSaves");
+    }
+
+    if (!std::filesystem::exists(saveDirectory / "oldExtdata"))
+    {
+        std::filesystem::create_directories(saveDirectory / "oldExtdata");
+    }
+
     if (!std::filesystem::exists(citraDirectory))
     {
         citraDirectory = ""; // Return an empty path if the Citra directory doesn't exist
@@ -210,10 +220,65 @@ void ConfigManager::initialise()
 
 }
 
+std::filesystem::path ConfigManager::getGamePathFromGameID(UploadType type, QString gameID) {
+
+
+    QJsonObject gameIDFileAsObject = getGameIDFile(type).object();
+
+    QJsonArray gameIDArray = gameIDFileAsObject["gameID"].toArray();
+
+    for (int i = 0; i < gameIDArray.size(); ++i) {
+        QJsonValue value = gameIDArray.at(i);
+        if (gameID == value[0].toString()) {
+            return std::filesystem::path(value[1].toString().toStdString());
+        }
+    }
+
+    return "";
+}
+
 QString ConfigManager::getToken() const {
     return getConfig()["token"].toString();
 }
 
 bool ConfigManager::loggedIn() {
     return userID != "invalid";
+}
+
+bool ConfigManager::copyDirectory(const std::filesystem::path& source, const std::filesystem::path& destination) {
+    try {
+        if (!std::filesystem::exists(source) || !std::filesystem::is_directory(source)) {
+            qDebug() << "Source directory doesn't exist or is not a directory.";
+            return false;
+        }
+
+        if (!std::filesystem::exists(destination)) {
+            if (!std::filesystem::create_directories(destination)) {
+                qDebug() << "Failed to create the destination directory.";
+                return false;
+            }
+        }
+
+        for (const auto& entry : std::filesystem::directory_iterator(source)) {
+            const std::filesystem::path entryPath = entry.path();
+            const std::filesystem::path destinationPath = destination / entryPath.filename();
+
+            if (std::filesystem::is_directory(entryPath)) {
+                if (!copyDirectory(entryPath, destinationPath)) {
+                    return false;
+                }
+            } else if (std::filesystem::is_regular_file(entryPath)) {
+                std::filesystem::copy_file(entryPath, destinationPath, std::filesystem::copy_options::overwrite_existing);
+            }
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "An error occurred: " << e.what() << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+std::filesystem::path ConfigManager::getOldSaveDirectory(UploadType type) const {
+    return saveDirectory / ((type == UploadType::SAVES) ? "oldSaves" : "oldExtdata");
 }
