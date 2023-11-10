@@ -68,6 +68,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     connect(ui->downloadButton, &QPushButton::clicked, this, &MainWindow::handleDownloadButton);
 
+    connect(ui->clearOldSavesButton, &QPushButton::clicked, this, &MainWindow::handleClearOldSavesButton);
+
     // MainWindow.cpp (in the constructor)
     //connect(configManager, &ConfigManager::checkTokenInConfig, this, &MainWindow::handleTokenInConfig);
 
@@ -348,6 +350,16 @@ void MainWindow::showErrorBox(QString error) {
     errorMessage.exec();
 }
 
+void MainWindow::showSuccessBox(QString text) {
+    QMessageBox errorMessage;
+    errorMessage.setWindowTitle("Success");
+    errorMessage.setText(text);
+    errorMessage.setStandardButtons(QMessageBox::Ok);
+
+    // Show the error message dialog
+    errorMessage.exec();
+}
+
 UploadType MainWindow::savesOrExtdata() {
     return (ui->extdataRadio->isChecked() ? UploadType::EXTDATA : UploadType::SAVES);
 }
@@ -428,7 +440,8 @@ void MainWindow::handleUploadButton() {
     }
 
     if (responseCode == 201) {
-        MainWindow::showErrorBox("Upload successful! HTTP " + QString::number(responseCode));
+        MainWindow::showSuccessBox("Upload successful!");
+        handleServerFetch();
     } else {
         MainWindow::showErrorBox("Something went wrong during upload, HTTP " + QString::number(responseCode));
     }
@@ -474,6 +487,8 @@ void MainWindow::handleServerFetch() {
 
     QVector<QString>* serverGameIDs = (MainWindow::savesOrExtdata() == UploadType::SAVES) ? &citraholdServer->serverGameIDSaves : &citraholdServer->serverGameIDExtdata;
 
+    ui->downloadButton->setEnabled((serverGameIDs->size() > 0));
+
     for (const QString &key : *serverGameIDs) {
 
         ui->downloadGameIDComboBox->addItem(key);
@@ -516,11 +531,17 @@ void MainWindow::handleDownloadButton() {
                 std::filesystem::create_directories(configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()));
             }
 
-            citraholdServer->download(
+            int downloadResponse = citraholdServer->download(
                 MainWindow::savesOrExtdata(),
                 ui->downloadGameIDComboBox->currentText(),
                 configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText())
             );
+
+            if (downloadResponse) {
+                showSuccessBox("Download successful!");
+            } else {
+                showErrorBox("Something went wrong with the download...");
+            }
         }
     }
 
@@ -535,4 +556,9 @@ void MainWindow::handleSaveExtdataRadios() {
         ui->gameIDText->setPlainText("");
     }
     handleServerFetch();
+}
+
+
+void MainWindow::handleClearOldSavesButton() {
+    std::filesystem::remove_all(configManager->getOldSaveDirectory(MainWindow::savesOrExtdata()));
 }

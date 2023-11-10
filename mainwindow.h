@@ -27,6 +27,7 @@ private slots:
     void handleUploadButton();
     void handleServerFetch();
     void handleDownloadButton();
+    void handleClearOldSavesButton();
 
 private:
     Ui::MainWindow *ui;
@@ -35,6 +36,7 @@ private:
     void openGameIDSelector();
     void addGameIDToFile();
     void showErrorBox(QString error = "");
+    void showSuccessBox(QString text);
     UploadType savesOrExtdata();
 
     void handleSaveExtdataRadios();

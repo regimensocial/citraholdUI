@@ -51,12 +51,14 @@ responsePair CitraholdServer::sendRequest(QString address, QJsonObject *dataToSe
 	// Connect the finished() signal to a slot to handle the response
 	eventLoop.exec();
 
+    int httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
 	if (reply->error() == QNetworkReply::NoError)
     {
         // The request was successfully made without network issues.
 
         // Check the HTTP status code to determine the server's response.
-        int httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
 
         // Check the Content-Type header to determine the response type
         QVariant contentType = reply->header(QNetworkRequest::ContentTypeHeader);
@@ -81,9 +83,9 @@ responsePair CitraholdServer::sendRequest(QString address, QJsonObject *dataToSe
             return std::make_pair(httpStatusCode, QJsonDocument());
         }
 	}
-	else // actual connection error???
+    else // actual error
 	{
-        qDebug() << "Error!?!?";
+        qDebug() << "Error" << httpStatusCode;
 		delete reply;
 		return std::make_pair(0, QJsonDocument());
 	}
@@ -185,19 +187,25 @@ int CitraholdServer::download(UploadType type, QString gameID, std::filesystem::
     if (response.first == 200) {
         QJsonArray files = response.second["files"].toArray();
 
+        bool successfulSoFar = true;
+
         for (int i = 0; i < files.size(); ++i) {
 
-            data["file"] = files.at(i).toString();
+            if (successfulSoFar) {
+                data["file"] = files.at(i).toString();
 
-            std::filesystem::path value = files.at(i).toString().toStdString();
+                std::filesystem::path value = files.at(i).toString().toStdString();
 
-            QString downloadPath = QString::fromStdString((gamePath / value).string());
+                QString downloadPath = QString::fromStdString((gamePath / value).string());
 
-            sendRequest(this->serverAddress + (type == UploadType::SAVES ? "/downloadSaves" : "/downloadExtdata"), &data, &downloadPath);
+                responsePair downloadResponse = sendRequest(this->serverAddress + (type == UploadType::SAVES ? "/downloadSaves" : "/downloadExtdata"), &data, &downloadPath);
+
+                successfulSoFar = (downloadResponse.first == 200);
+            }
         }
 
-    } else {
-        return 0;
+        return successfulSoFar;
+
     }
     return 0;
 }

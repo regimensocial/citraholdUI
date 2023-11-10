@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>421</height>
+    <height>430</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -296,6 +296,19 @@
       </property>
       <property name="text">
        <string>Game ID</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="clearOldSavesButton">
+      <property name="geometry">
+       <rect>
+        <x>580</x>
+        <y>270</y>
+        <width>171</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Clear Old Saves on System</string>
       </property>
      </widget>
     </widget>
