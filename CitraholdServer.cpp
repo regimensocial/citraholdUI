@@ -27,14 +27,11 @@ responsePair CitraholdServer::sendRequest(QString address, QJsonObject *dataToSe
 {
 	QEventLoop eventLoop;
 
-	// Create the HTTP request
     QObject::connect(networkManager, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
 
 	QNetworkRequest req(address);
 
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-
-	// Create a JSON object or use a QJsonObject
 
 	QJsonObject jsonObject = QJsonObject();
 	if (dataToSend != nullptr)
@@ -42,29 +39,21 @@ responsePair CitraholdServer::sendRequest(QString address, QJsonObject *dataToSe
 		jsonObject = *dataToSend;
 	}
 
-	// Serialize the JSON object to a QByteArray
 	QByteArray jsonData = QJsonDocument(jsonObject).toJson();
 
-	// Initiate the network request asynchronously
 	QNetworkReply *reply = this->networkManager->post(req, jsonData);
 
-	// Connect the finished() signal to a slot to handle the response
 	eventLoop.exec();
 
     int httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
 	if (reply->error() == QNetworkReply::NoError)
     {
-        // The request was successfully made without network issues.
 
-        // Check the HTTP status code to determine the server's response.
-
-
-        // Check the Content-Type header to determine the response type
         QVariant contentType = reply->header(QNetworkRequest::ContentTypeHeader);
 
         if (contentType.toString().startsWith("application/json")) {
-            // It's a JSON response
+            
             QJsonDocument response = QJsonDocument::fromJson(reply->readAll());
             delete reply;
             return std::make_pair(httpStatusCode, response);
@@ -85,9 +74,10 @@ responsePair CitraholdServer::sendRequest(QString address, QJsonObject *dataToSe
 	}
     else // actual error
 	{
-        qDebug() << "Error" << httpStatusCode;
-		delete reply;
-        return std::make_pair(httpStatusCode, QJsonDocument());
+        
+		QJsonDocument response = QJsonDocument::fromJson(reply->readAll());
+        delete reply;
+        return std::make_pair(httpStatusCode, response);
 	}
 
     delete reply;
@@ -96,7 +86,6 @@ responsePair CitraholdServer::sendRequest(QString address, QJsonObject *dataToSe
 
 QString CitraholdServer::getTokenFromShorthandToken(QString shorthandToken)
 {
-	// we need to make {token: token}
 	QJsonObject data;
 
 	data["shorthandToken"] = shorthandToken;
@@ -105,9 +94,6 @@ QString CitraholdServer::getTokenFromShorthandToken(QString shorthandToken)
 	responsePair response = sendRequest(this->serverAddress + "/getToken", &data);
 	if (response.first == 200)
 	{
-		// we got a token
-		// debug output
-		qDebug() << response.second["token"].toString();
 
         this->token = response.second["token"].toString();
         return response.second["token"].toString();
@@ -115,7 +101,7 @@ QString CitraholdServer::getTokenFromShorthandToken(QString shorthandToken)
 	else
 	{
 		// we didn't get a token
-		// TODO: handle this
+		// TODO: handle this????
 		return "invalid";
 	}
 }
@@ -129,10 +115,6 @@ QString CitraholdServer::verifyTokenToSetUserID(QString fullToken)
 	responsePair response = sendRequest(this->serverAddress + "/getUserID", &data);
 	if (response.first == 200)
 	{
-		// we got a token
-		// debug output
-		qDebug() << response.second["token"].toString();
-        // untested
         this->token = fullToken;
 		return response.second["userID"].toString();
 	}
@@ -144,19 +126,26 @@ QString CitraholdServer::verifyTokenToSetUserID(QString fullToken)
 	}
 }
 
-int CitraholdServer::upload(UploadType type, QString filePath, QString base64Data) {
+bool CitraholdServer::checkServerIsOnline()
+{
+    responsePair response = sendRequest(this->serverAddress + "/areyouawake");
+    return response.first == 200;
+}
 
-    qDebug() << this->serverAddress << this->token;
-
+int CitraholdServer::upload(UploadType type, QString filePath, QString base64Data)
+{
 
     QJsonObject data;
 
-    data["data"] = base64Data;
-    data["filename"] = filePath;
+
+
     data["token"] = this->token;
+    data["filename"] = filePath;
+    data["data"] = base64Data;
+
 
     // this will return a full token
-    responsePair response = sendRequest(this->serverAddress + (type == UploadType::SAVES ? "/uploadSaves" : "/UploadExtdata"), &data);
+    responsePair response = sendRequest(this->serverAddress + (type == UploadType::SAVES ? "/UploadSaves" : "/UploadExtdata"), &data);
 
     qDebug() << "uploadResponse " << response.first;
 

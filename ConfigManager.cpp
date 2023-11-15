@@ -7,7 +7,7 @@
 
 ConfigManager::ConfigManager()
 {
-    // Constructor: Initialize the directory paths based on the platform
+    // Constructor: Initialise the directory paths based on the platform
     initialise();
 }
 
@@ -44,15 +44,10 @@ void ConfigManager::setToken(QString token)
     config = QJsonDocument(configObject);
 
     updateConfigFile(config);
-
-    // emit checkTokenInConfig("Test");
 }
 
 QJsonDocument ConfigManager::getConfig()
 {
-    // config file is saveDirectory/config.json
-
-    // If the config file doesn't exist, create it
 
     std::filesystem::path filePath = saveDirectory / "config.json";
 
@@ -62,8 +57,8 @@ QJsonDocument ConfigManager::getConfig()
         file.open(filePath, std::ios::out);
 
         QJsonObject json;
-        json["serverAddress"] = "http://192.168.1.152:3000";
-        json["token"] = "unknown???";
+        json["serverAddress"] = "https://api.citrahold.com";
+        json["token"] = "invalid";
         json["_note"] = "keep your token private!";
         json["defaultCitraDirectory"] = QString(citraDirectory.string().c_str());
         json["lastUploadedGameID"] = "";
@@ -90,9 +85,6 @@ QJsonDocument ConfigManager::getConfig()
 
 QJsonDocument ConfigManager::getGameIDFile(UploadType type)
 {
-    // config file is saveDirectory/config.json
-
-    // If the config file doesn't exist, create it
 
     std::filesystem::path filePath = saveDirectory / (type == UploadType::SAVES ? "gameIDSaves.json" : "gameIDExtdata.json");
 
@@ -118,7 +110,6 @@ QJsonDocument ConfigManager::getGameIDFile(UploadType type)
         file.close();
 
         QJsonDocument fileAsObject = QJsonDocument::fromJson(fileContents.c_str());
-        // qDebug() << "From file! " << fileAsObject["gameID"].toArray().size();
         return fileAsObject;
     }
 }
@@ -167,7 +158,6 @@ QString ConfigManager::getConfigProperty(QString property)
 
 void ConfigManager::addEntryToGameIDFile(UploadType type, QString gameID, QString gameName)
 {
-    // check for duplicates first
 
     QJsonDocument gameIDFile = getGameIDFile(type);
 
@@ -274,10 +264,6 @@ void ConfigManager::initialise()
     }
 
     QJsonDocument config = getConfig();
-
-    qDebug() << "Citra directory: " << QString(citraDirectory.string().c_str());
-    qDebug() << "Citra directory 2: " << (config["defaultCitraDirectory"].toString().toStdString());
-
     if (getConfigProperty("defaultCitraDirectory").toStdString() != citraDirectory)
     {
         citraDirectory = std::filesystem::path(getConfigProperty("defaultCitraDirectory").toStdString());

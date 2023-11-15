@@ -4,11 +4,6 @@ std::string directory;
 
 std::filesystem::path getSaveDirectory()
 {
-    // so on MacOS and Linux
-    // ~/.config/MYAPP/config.json
-
-    // and on Windows
-    // %APPDATA%/(Roaming)/MYAPP/config.json
 
     std::filesystem::path saveDirectory;
 #ifdef _WIN32
@@ -31,7 +26,7 @@ std::filesystem::path getSaveDirectory()
 
 std::filesystem::path getLikelyCitraDirectory()
 {
-    // so on MacOS 
+    // so on MacOS
     // ~/Library/Application Support/Citra/
 
     // on Linux
@@ -57,7 +52,7 @@ std::filesystem::path getLikelyCitraDirectory()
     citraDirectory /= ".local";
     citraDirectory /= "share";
     citraDirectory /= "citra-emu";
-    
+
 #endif
     if (!std::filesystem::exists(citraDirectory))
     {

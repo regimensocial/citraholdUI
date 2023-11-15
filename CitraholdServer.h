@@ -20,15 +20,9 @@ enum UploadType
 class CitraholdServer {
 public:
     CitraholdServer(QString serverAddress, QString token);
-    
-    // This takes a raw token and flat out sets it
-    
 
-    // This will take a shorthand token and get the full token
     QString getTokenFromShorthandToken(QString shorthandToken);
 
-    // This will take in a full token and get the user ID
-    // User ID is kind of useless, but it's a good way to verify the token
     QString verifyTokenToSetUserID(QString fullToken);
 
     QJsonArray getGameIDsFromServer(UploadType type);
@@ -36,6 +30,8 @@ public:
 
     QVector<QString> serverGameIDSaves;
     QVector<QString> serverGameIDExtdata;
+
+    bool checkServerIsOnline();
 
     int upload(UploadType type, QString filePath, QString base64Data);
     int download(UploadType type, QString gameID, std::filesystem::path gamePath);
