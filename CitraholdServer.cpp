@@ -87,10 +87,10 @@ responsePair CitraholdServer::sendRequest(QString address, QJsonObject *dataToSe
 	{
         qDebug() << "Error" << httpStatusCode;
 		delete reply;
-		return std::make_pair(0, QJsonDocument());
+        return std::make_pair(httpStatusCode, QJsonDocument());
 	}
 
-	// just in case
+    delete reply;
 	return std::make_pair(0, QJsonDocument());
 }
 
@@ -157,6 +157,9 @@ int CitraholdServer::upload(UploadType type, QString filePath, QString base64Dat
 
     // this will return a full token
     responsePair response = sendRequest(this->serverAddress + (type == UploadType::SAVES ? "/uploadSaves" : "/UploadExtdata"), &data);
+
+    qDebug() << "uploadResponse " << response.first;
+
     return response.first;
 }
 

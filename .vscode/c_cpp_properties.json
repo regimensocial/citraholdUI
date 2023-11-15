@@ -4,8 +4,8 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/include/**",
-                "/opt/homebrew/include/**"
+                "/opt/homebrew/include/**",
+                "/Users/jamie/Programming/qtProjects/build-citraholdUI-Desktop_arm_darwin_generic_mach_o_64bit-Debug/**"
             ],
             "macFrameworkPath": [
                 "/Library/Frameworks"

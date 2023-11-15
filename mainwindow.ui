@@ -6,32 +6,37 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>430</height>
+    <width>371</width>
+    <height>421</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>.AppleSystemUIFont</family>
+   </font>
+  </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Citrahold PC</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QStackedWidget" name="stackedWidget">
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>0</y>
-      <width>801</width>
-      <height>371</height>
+      <y>60</y>
+      <width>371</width>
+      <height>321</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
-    <widget class="QWidget" name="page">
+    <widget class="QWidget" name="login">
      <widget class="QLabel" name="label_2">
       <property name="geometry">
        <rect>
-        <x>240</x>
-        <y>100</y>
+        <x>30</x>
+        <y>160</y>
         <width>171</width>
         <height>16</height>
        </rect>
@@ -44,7 +49,7 @@
       <property name="geometry">
        <rect>
         <x>200</x>
-        <y>220</y>
+        <y>270</y>
         <width>401</width>
         <height>16</height>
        </rect>
@@ -56,8 +61,8 @@
      <widget class="QPushButton" name="verifyButton">
       <property name="geometry">
        <rect>
-        <x>240</x>
-        <y>170</y>
+        <x>30</x>
+        <y>230</y>
         <width>311</width>
         <height>41</height>
        </rect>
@@ -69,8 +74,8 @@
      <widget class="QPlainTextEdit" name="tokenText">
       <property name="geometry">
        <rect>
-        <x>240</x>
-        <y>130</y>
+        <x>30</x>
+        <y>190</y>
         <width>311</width>
         <height>31</height>
        </rect>
@@ -79,13 +84,29 @@
        <string>Enter your shorthand token</string>
       </property>
      </widget>
+     <widget class="QLabel" name="label_7">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>-30</y>
+        <width>341</width>
+        <height>221</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap resource="banner.qrc">:/banner/citraholdminibanner.png</pixmap>
+      </property>
+     </widget>
     </widget>
-    <widget class="QWidget" name="page_2">
+    <widget class="QWidget" name="upload">
      <widget class="QPushButton" name="selectDirectoryButton">
       <property name="geometry">
        <rect>
         <x>30</x>
-        <y>80</y>
+        <y>30</y>
         <width>311</width>
         <height>32</height>
        </rect>
@@ -98,65 +119,17 @@
       <property name="geometry">
        <rect>
         <x>30</x>
-        <y>120</y>
+        <y>70</y>
         <width>311</width>
         <height>91</height>
        </rect>
-      </property>
-     </widget>
-     <widget class="QRadioButton" name="saveRadio">
-      <property name="geometry">
-       <rect>
-        <x>310</x>
-        <y>40</y>
-        <width>99</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>save</string>
-      </property>
-     </widget>
-     <widget class="QRadioButton" name="extdataRadio">
-      <property name="geometry">
-       <rect>
-        <x>400</x>
-        <y>40</y>
-        <width>81</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>extdata</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label">
-      <property name="geometry">
-       <rect>
-        <x>310</x>
-        <y>20</y>
-        <width>161</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <italic>false</italic>
-        <bold>true</bold>
-        <underline>false</underline>
-        <strikeout>false</strikeout>
-        <kerning>false</kerning>
-       </font>
-      </property>
-      <property name="text">
-       <string>Make sure this is correct</string>
       </property>
      </widget>
      <widget class="QPlainTextEdit" name="gameIDText">
       <property name="geometry">
        <rect>
         <x>30</x>
-        <y>240</y>
+        <y>190</y>
         <width>250</width>
         <height>31</height>
        </rect>
@@ -172,7 +145,7 @@
       <property name="geometry">
        <rect>
         <x>30</x>
-        <y>310</y>
+        <y>260</y>
         <width>311</width>
         <height>51</height>
        </rect>
@@ -185,13 +158,14 @@
       <property name="geometry">
        <rect>
         <x>30</x>
-        <y>220</y>
+        <y>170</y>
         <width>311</width>
         <height>16</height>
        </rect>
       </property>
       <property name="font">
        <font>
+        <family>.AppleSystemUIFont</family>
         <italic>false</italic>
         <bold>false</bold>
         <underline>false</underline>
@@ -207,7 +181,7 @@
       <property name="geometry">
        <rect>
         <x>284</x>
-        <y>236</y>
+        <y>186</y>
         <width>56</width>
         <height>65</height>
        </rect>
@@ -220,13 +194,14 @@
       <property name="geometry">
        <rect>
         <x>29</x>
-        <y>270</y>
+        <y>220</y>
         <width>252</width>
         <height>31</height>
        </rect>
       </property>
       <property name="font">
        <font>
+        <family>.AppleSystemUIFont</family>
         <pointsize>12</pointsize>
         <italic>false</italic>
        </font>
@@ -235,11 +210,39 @@
        <string>Select from previous ID/names</string>
       </property>
      </widget>
+     <widget class="QLabel" name="label_5">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>10</y>
+        <width>131</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Upload a save below.</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="download">
+     <widget class="QPushButton" name="downloadButton">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>260</y>
+        <width>311</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Download Save</string>
+      </property>
+     </widget>
      <widget class="QPushButton" name="fetchButton">
       <property name="geometry">
        <rect>
-        <x>440</x>
-        <y>80</y>
+        <x>30</x>
+        <y>30</y>
         <width>311</width>
         <height>71</height>
        </rect>
@@ -248,45 +251,18 @@
        <string>Fetch Saves</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="downloadButton">
-      <property name="geometry">
-       <rect>
-        <x>440</x>
-        <y>310</y>
-        <width>311</width>
-        <height>50</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Download Save</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="downloadGameIDComboBox">
-      <property name="geometry">
-       <rect>
-        <x>440</x>
-        <y>240</y>
-        <width>301</width>
-        <height>32</height>
-       </rect>
-      </property>
-      <item>
-       <property name="text">
-        <string>test option 1</string>
-       </property>
-      </item>
-     </widget>
      <widget class="QLabel" name="label_4">
       <property name="geometry">
        <rect>
-        <x>440</x>
-        <y>220</y>
+        <x>30</x>
+        <y>140</y>
         <width>311</width>
         <height>16</height>
        </rect>
       </property>
       <property name="font">
        <font>
+        <family>.AppleSystemUIFont</family>
         <italic>false</italic>
         <bold>false</bold>
         <underline>false</underline>
@@ -298,19 +274,122 @@
        <string>Game ID</string>
       </property>
      </widget>
+     <widget class="QComboBox" name="downloadGameIDComboBox">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>160</y>
+        <width>301</width>
+        <height>32</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>test option 1</string>
+       </property>
+      </item>
+     </widget>
      <widget class="QPushButton" name="clearOldSavesButton">
       <property name="geometry">
        <rect>
-        <x>580</x>
-        <y>270</y>
-        <width>171</width>
+        <x>140</x>
+        <y>190</y>
+        <width>201</width>
         <height>31</height>
        </rect>
       </property>
       <property name="text">
-       <string>Clear Old Saves on System</string>
+       <string>Clear Old Saves on This System</string>
       </property>
      </widget>
+     <widget class="QLabel" name="label_6">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>10</y>
+        <width>161</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Download a save below.</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="selectionBox" native="true">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>22</y>
+      <width>311</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <widget class="QRadioButton" name="saveRadio">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>20</y>
+       <width>99</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>save</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>161</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>.AppleSystemUIFont</family>
+       <italic>false</italic>
+       <bold>true</bold>
+       <underline>false</underline>
+       <strikeout>false</strikeout>
+       <kerning>false</kerning>
+      </font>
+     </property>
+     <property name="text">
+      <string>Make sure this is correct</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="extdataRadio">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>20</y>
+       <width>81</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>extdata</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="switchModeButton">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>0</y>
+       <width>131</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Switch to Download</string>
+     </property>
     </widget>
    </widget>
   </widget>
@@ -319,13 +398,15 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>371</width>
      <height>24</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <resources/>
+ <resources>
+  <include location="banner.qrc"/>
+ </resources>
  <connections/>
 </ui>

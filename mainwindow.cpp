@@ -28,68 +28,100 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     configManager = new ConfigManager();
 
     citraholdServer = new CitraholdServer(
-        configManager->getConfig()["serverAddress"].toString(),
-        configManager->getConfig()["token"].toString()
-    );
+        configManager->getConfigProperty("serverAddress"),
+        configManager->getConfigProperty("token"));
 
     ui->setupUi(this);
     ui->statusbar->showMessage("Not logged in.");
+
+    ui->selectionBox->hide();
+
     configManager = new ConfigManager();
 
-    connect (
+    connect(
         ui->verifyButton, &QPushButton::clicked,
-        this, &MainWindow::handleVerifyButtonClicked
-    );
+        this, &MainWindow::handleVerifyButtonClicked);
 
-    connect (
+    connect(
         ui->tokenText, &QPlainTextEdit::textChanged,
-        this, &MainWindow::manageTokenTextEdit
-    );
+        this, &MainWindow::manageTokenTextEdit);
 
-    connect (ui->selectDirectoryButton, &QPushButton::clicked, this, [=](){
-        handleDirectoryButton(true);
-    });
+    connect(ui->selectDirectoryButton, &QPushButton::clicked, this, [=]()
+            { handleDirectoryButton(true); });
 
-    connect (ui->uploadButton, &QPushButton::clicked, this, &MainWindow::handleUploadButton);
+    connect(ui->uploadButton, &QPushButton::clicked, this, &MainWindow::handleUploadButton);
 
-    connect(ui->directoryText, &QPlainTextEdit::textChanged, this, [=](){
-        handleDirectoryButton(false);
-    });
+    connect(ui->directoryText, &QPlainTextEdit::textChanged, this, [=]()
+            { handleDirectoryButton(false); });
 
-    connect (ui->selectPreviousGameIDsButton, &QPushButton::clicked, this, &MainWindow::openGameIDSelector);
-    connect (ui->saveGameIDButton, &QPushButton::clicked, this, &MainWindow::addGameIDToFile);
-    connect (ui->gameIDText, &QPlainTextEdit::textChanged, this, [&]() {
-        ui->saveGameIDButton->setDisabled(false);
-    });
+    connect(ui->selectPreviousGameIDsButton, &QPushButton::clicked, this, &MainWindow::openGameIDSelector);
+    connect(ui->saveGameIDButton, &QPushButton::clicked, this, &MainWindow::addGameIDToFile);
+    connect(ui->gameIDText, &QPlainTextEdit::textChanged, this, [&]()
+            { ui->saveGameIDButton->setDisabled(false); });
 
-    connect (ui->extdataRadio, &QRadioButton::clicked, this, &MainWindow::handleSaveExtdataRadios);
-    connect (ui->saveRadio, &QRadioButton::clicked, this, &MainWindow::handleSaveExtdataRadios);
-    connect (ui->fetchButton, &QPushButton::clicked, this, &MainWindow::handleServerFetch);
+    connect(ui->extdataRadio, &QRadioButton::clicked, this, &MainWindow::handleSaveExtdataRadios);
+    connect(ui->saveRadio, &QRadioButton::clicked, this, &MainWindow::handleSaveExtdataRadios);
+    connect(ui->fetchButton, &QPushButton::clicked, this, &MainWindow::handleServerFetch);
 
     connect(ui->downloadButton, &QPushButton::clicked, this, &MainWindow::handleDownloadButton);
 
     connect(ui->clearOldSavesButton, &QPushButton::clicked, this, &MainWindow::handleClearOldSavesButton);
 
+    connect(ui->switchModeButton, &QPushButton::clicked, this, &MainWindow::handleToggleModeButton);
+
     // MainWindow.cpp (in the constructor)
-    //connect(configManager, &ConfigManager::checkTokenInConfig, this, &MainWindow::handleTokenInConfig);
+    // connect(configManager, &ConfigManager::checkTokenInConfig, this, &MainWindow::handleTokenInConfig);
 
     QString userID = citraholdServer->verifyTokenToSetUserID(configManager->getToken());
     configManager->userID = userID;
 
     ui->directoryText->setPlainText(QString::fromStdString(configManager->getLikelyCitraDirectory().u8string()));
 
-    if (configManager->loggedIn()) {
-        ui->stackedWidget->setCurrentIndex(1);
-        ui->statusbar->showMessage("Logged in.");
+    if (configManager->loggedIn())
+    {
 
-        handleServerFetch();
-
-    } else {
+        handleSuccessfulLogin();
+    }
+    else
+    {
         ui->stackedWidget->setCurrentIndex(0);
+        ui->selectionBox->hide();
         // at some point, we'll need to check if the server is running
     }
 
     changedNameOrDirectorySinceSetAutomatically = false;
+
+    QJsonObject config = configManager->getConfig().object();
+    if (config["lastUploadedGameID"].toString() != "")
+    {
+        ui->gameIDText->setPlainText(config["lastUploadedGameID"].toString());
+
+        if (configManager->getConfigProperty("lastMode") != "UPLOAD")
+        { // // s
+
+            qDebug() << config["lastUploadedType"].toString();
+            if (config["lastUploadedType"].toString() == "EXTDATA")
+            {
+                ui->extdataRadio->toggle();
+            }
+        }
+        else
+        {
+            qDebug() << config["lastDownloadedType"].toString();
+            if (config["lastDownloadedType"].toString() == "EXTDATA")
+            {
+                ui->extdataRadio->toggle();
+            }
+        }
+
+        // get the directory from the gameID file
+        configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), config["lastUploadedGameID"].toString());
+    }
+
+    if (configManager->getConfigProperty("lastMode") == "UPLOAD")
+    {
+        handleToggleModeButton();
+    }
 }
 
 MainWindow::~MainWindow()
@@ -97,7 +129,8 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::openGameIDSelector() {
+void MainWindow::openGameIDSelector()
+{
     QDialog dialog;
     dialog.setWindowTitle("You must now select a game ID");
 
@@ -109,7 +142,6 @@ void MainWindow::openGameIDSelector() {
     // Access the "gameID" key, which contains an array of arrays
     QJsonArray gameIDArray = jsonObject["gameID"].toArray();
 
-
     // Create a combo box (selector)
     QComboBox comboBox;
 
@@ -117,8 +149,10 @@ void MainWindow::openGameIDSelector() {
     comboBox.addItem("Select one please (" + ofWhich + ")");
     QVector<QString> gameIDPaths;
     // Iterate through the array of arrays and access the key-value pairs
-    for (const QJsonValue& arrayValue : gameIDArray) {
-        if (arrayValue.isArray()) {
+    for (const QJsonValue &arrayValue : gameIDArray)
+    {
+        if (arrayValue.isArray())
+        {
             QJsonArray innerArray = arrayValue.toArray();
             comboBox.addItem(innerArray[0].toString());
             gameIDPaths.append(innerArray[1].toString());
@@ -132,12 +166,12 @@ void MainWindow::openGameIDSelector() {
     QPlainTextEdit gameID;
     QPlainTextEdit gamePath;
     gameID.setLineWrapMode(QPlainTextEdit::NoWrap);
-    gameID.setMaximumHeight(30);  // Adjust the height as needed
+    gameID.setMaximumHeight(30); // Adjust the height as needed
     gameID.setMinimumHeight(30);
     gamePath.setLineWrapMode(QPlainTextEdit::NoWrap);
     gamePath.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     gameID.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    gamePath.setMaximumHeight(30);  // Adjust the height as needed
+    gamePath.setMaximumHeight(30); // Adjust the height as needed
     gamePath.setMinimumHeight(30);
     gamePath.setMaximumWidth(300);
     gameID.setMaximumWidth(300);
@@ -152,21 +186,16 @@ void MainWindow::openGameIDSelector() {
     label.setWordWrap(true);
     label.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
 
-
-
     // Create an "OK" button
     QPushButton okButton("OK");
     layout.addWidget(&okButton);
 
-
     // Connect the "OK" button to a slot for processing
-
-
-
 
     gameID.setDisabled(true);
     gamePath.setDisabled(true);
-    QObject::connect(&comboBox, &QComboBox::currentTextChanged, &dialog, [&]() {
+    QObject::connect(&comboBox, &QComboBox::currentTextChanged, &dialog, [&]()
+                     {
         if (comboBox.currentIndex() == 0) {
             label.setText("");
             gameID.setDisabled(true);
@@ -177,10 +206,10 @@ void MainWindow::openGameIDSelector() {
             gameID.setPlainText(comboBox.currentText());
             gamePath.setPlainText(gameIDPaths[comboBox.currentIndex() - 1]);
             label.setText(comboBox.currentText() + " refers to \n" + gameIDPaths[comboBox.currentIndex() - 1]);
-        }
-    });
+        } });
 
-    QObject::connect(&okButton, &QPushButton::clicked, &dialog, [&]() {
+    QObject::connect(&okButton, &QPushButton::clicked, &dialog, [&]()
+                     {
         if (comboBox.currentIndex() > 0) {
             ui->gameIDText->setPlainText(comboBox.currentText());
             ui->directoryText->setPlainText(gameIDPaths[comboBox.currentIndex() - 1]);
@@ -203,30 +232,42 @@ void MainWindow::openGameIDSelector() {
         newGameIDObject["gameID"] = newGameIDArray;
         configManager->updateGameIDFile(MainWindow::savesOrExtdata(), QJsonDocument(newGameIDObject));
 
-        dialog.close();
-    });
+        dialog.close(); });
 
-    QObject::connect(&gameID, &QPlainTextEdit::textChanged, &dialog, [&]() {
+    QObject::connect(&gameID, &QPlainTextEdit::textChanged, &dialog, [&]()
+                     {
         if (gameID.toPlainText() != comboBox.currentText()) {
             comboBox.setItemText(comboBox.currentIndex(), gameID.toPlainText());
             gameID.moveCursor(QTextCursor::End);
-        }
-    });
+        } });
 
-    QObject::connect(&gamePath, &QPlainTextEdit::textChanged, &dialog, [&]() {
+    QObject::connect(&gamePath, &QPlainTextEdit::textChanged, &dialog, [&]()
+                     {
         if (gamePath.toPlainText() != gameIDPaths[comboBox.currentIndex() - 1]) {
             gameIDPaths[comboBox.currentIndex() - 1] = gamePath.toPlainText();
             gamePath.moveCursor(QTextCursor::End);
             label.setText(comboBox.currentText() + " points to " + gameIDPaths[comboBox.currentIndex() - 1]);
-        }
-    });
-
-
+        } });
 
     // VALIDATE ANY PATHS
 
     dialog.exec();
+}
 
+void MainWindow::handleToggleModeButton()
+{
+    if (ui->stackedWidget->currentIndex() == 1)
+    {
+        ui->stackedWidget->setCurrentIndex(2);
+        ui->switchModeButton->setText("Switch to Upload");
+        configManager->updateConfigProperty("lastMode", "UPLOAD");
+    }
+    else
+    {
+        ui->stackedWidget->setCurrentIndex(1);
+        ui->switchModeButton->setText("Switch to Download");
+        configManager->updateConfigProperty("lastMode", "DOWNLOAD");
+    }
 }
 
 void MainWindow::manageTokenTextEdit()
@@ -268,10 +309,15 @@ void MainWindow::handleVerifyButtonClicked()
                 ui->tokenOutput->setText("Successfully authenticated.");
 
                 ui->stackedWidget->setCurrentIndex(1);
-            } else {
+                ui->selectionBox->show();
+            }
+            else
+            {
                 ui->tokenOutput->setText("You have the wrong credentials.");
             }
-        } else {
+        }
+        else
+        {
             ui->tokenOutput->setText("You have the wrong credentials.");
         }
     }
@@ -281,7 +327,6 @@ void MainWindow::handleVerifyButtonClicked()
         QString userID = citraholdServer->verifyTokenToSetUserID(fullToken);
         if (userID != "invalid")
         {
-            ui->statusbar->showMessage("Logged in.");
 
             configManager->setToken(fullToken);
             configManager->userID = userID;
@@ -290,32 +335,51 @@ void MainWindow::handleVerifyButtonClicked()
 
             ui->tokenOutput->setText("Successfully authenticated.");
 
-            ui->stackedWidget->setCurrentIndex(1);
-        } else {
+            handleSuccessfulLogin();
+        }
+        else
+        {
             ui->tokenOutput->setText("You have the wrong credentials.");
         }
     }
 }
 
-void MainWindow::handleDirectoryButton(bool openSelection) {
+void MainWindow::handleSuccessfulLogin()
+{
+    ui->stackedWidget->setCurrentIndex(1);
+    ui->selectionBox->show();
+    ui->statusbar->showMessage("Logged in.");
+    handleServerFetch();
+}
+
+void MainWindow::handleDirectoryButton(bool openSelection)
+{
 
     changedNameOrDirectorySinceSetAutomatically = true;
     QString directory;
     ui->saveGameIDButton->setDisabled(false);
 
-    if (openSelection) {
+    if (openSelection)
+    {
         directory = QFileDialog::getExistingDirectory(this, tr("Open Directory"), ui->directoryText->toPlainText());
-    } else {
+    }
+    else
+    {
         directory = ui->directoryText->toPlainText();
     }
-    if (directory != "") {
-        if (openSelection) {
+    if (directory != "")
+    {
+        if (openSelection)
+        {
             ui->directoryText->setPlainText(directory);
         }
 
-        if (directory.contains("extdata")) {
+        if (directory.contains("extdata"))
+        {
             ui->extdataRadio->toggle();
-        } else {
+        }
+        else
+        {
             ui->saveRadio->toggle();
 
             // gets the gameid
@@ -335,12 +399,14 @@ void MainWindow::handleDirectoryButton(bool openSelection) {
     }
 }
 
-void MainWindow::showErrorBox(QString error) {
+void MainWindow::showErrorBox(QString error)
+{
     QMessageBox errorMessage;
     errorMessage.setIcon(QMessageBox::Critical);
     errorMessage.setWindowTitle("Error");
     errorMessage.setText("An error has occurred.\n");
-    if (error != "") {
+    if (error != "")
+    {
         errorMessage.setText(errorMessage.text() + "\n" + error);
     }
 
@@ -350,7 +416,8 @@ void MainWindow::showErrorBox(QString error) {
     errorMessage.exec();
 }
 
-void MainWindow::showSuccessBox(QString text) {
+void MainWindow::showSuccessBox(QString text)
+{
     QMessageBox errorMessage;
     errorMessage.setWindowTitle("Success");
     errorMessage.setText(text);
@@ -360,11 +427,13 @@ void MainWindow::showSuccessBox(QString text) {
     errorMessage.exec();
 }
 
-UploadType MainWindow::savesOrExtdata() {
+UploadType MainWindow::savesOrExtdata()
+{
     return (ui->extdataRadio->isChecked() ? UploadType::EXTDATA : UploadType::SAVES);
 }
 
-void MainWindow::handleUploadButton() {
+void MainWindow::handleUploadButton()
+{
 
     QString directory = ui->directoryText->toPlainText();
 
@@ -372,12 +441,11 @@ void MainWindow::handleUploadButton() {
 
     QString gameID = ui->gameIDText->toPlainText();
 
-    if (gameID.trimmed() == "") {
+    if (gameID.trimmed() == "")
+    {
         showErrorBox("Invalid game ID");
         return;
     }
-
-    // at some point, we will need to check gameID is valid
 
     QQueue<QDir> directoriesToVisit;
     directoriesToVisit.enqueue(directory);
@@ -385,21 +453,25 @@ void MainWindow::handleUploadButton() {
     QQueue<QDir> allFilesFull;
     QQueue<QDir> allFilesRelative;
 
-
     QDateTime currentDateTime = QDateTime::currentDateTime();
 
     QString formattedDateTime = currentDateTime.toString("yyyyMMdd-hhmmss");
 
-    while (!directoriesToVisit.isEmpty()) {
+    while (!directoriesToVisit.isEmpty())
+    {
         QDir currentDir = directoriesToVisit.dequeue();
         QStringList entryList = currentDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
 
-        for (const QString &entry : entryList) {
+        for (const QString &entry : entryList)
+        {
             const QString fullPath = currentDir.filePath(entry);
-            if (QFileInfo(fullPath).isDir()) {
+            if (QFileInfo(fullPath).isDir())
+            {
                 // If it's a directory, enqueue it for later processing
                 directoriesToVisit.enqueue(QDir(fullPath));
-            } else {
+            }
+            else
+            {
                 // It's a file, do something with it
                 allFilesFull.enqueue(fullPath);
 
@@ -410,10 +482,12 @@ void MainWindow::handleUploadButton() {
     }
 
     QVector<int> responses;
-    for (const QDir &filePath : allFilesFull) {
+    for (const QDir &filePath : allFilesFull)
+    {
         QFile file(filePath.path());
 
-        if (file.open(QIODevice::ReadOnly)) {
+        if (file.open(QIODevice::ReadOnly))
+        {
             QByteArray fileData = file.readAll();
             file.close();
 
@@ -423,8 +497,9 @@ void MainWindow::handleUploadButton() {
 
             // CHPC means Citrahold PC, the one from the 3DS will have CHDS instead
             responses.append(citraholdServer->upload(MainWindow::savesOrExtdata(), gameID + "/" + allFilesRelative.first().path(), base64Data));
-
-        } else {
+        }
+        else
+        {
             // Handle the case where the file couldn't be opened
         }
 
@@ -432,33 +507,40 @@ void MainWindow::handleUploadButton() {
     }
 
     int responseCode = 0;
-    for (int value : responses) {
+    for (int value : responses)
+    {
         responseCode = value;
-        if (value != 201) {
+        if (value != 201)
+        {
             break; // Exit the loop as soon as a non-201 value is encountered
         }
     }
 
-    if (responseCode == 201) {
+    if (responseCode == 201)
+    {
         MainWindow::showSuccessBox("Upload successful!");
+
+        configManager->updateConfigProperty("lastUploadedGameID", gameID);
+        configManager->updateConfigProperty("lastUploadedType", (ui->extdataRadio->isChecked() ? "EXTDATA" : "SAVES"));
+
         handleServerFetch();
-    } else {
+    }
+    else
+    {
         MainWindow::showErrorBox("Something went wrong during upload, HTTP " + QString::number(responseCode));
     }
-
-
 }
 
-void MainWindow::addGameIDToFile() {
+void MainWindow::addGameIDToFile()
+{
 
     QJsonDocument gameIDFile = configManager->getGameIDFile(MainWindow::savesOrExtdata());
 
     QJsonValue gameIDValue = gameIDFile["gameID"];
 
-
-
     // Check if it's an array before converting
-    if (gameIDValue.isArray()) {
+    if (gameIDValue.isArray())
+    {
         QJsonArray newGameIDArray = gameIDValue.toArray();
 
         QString directory = ui->directoryText->toPlainText();
@@ -467,98 +549,138 @@ void MainWindow::addGameIDToFile() {
 
         QString gameID = ui->gameIDText->toPlainText();
 
-        if ((gameID != "") && (directory != "")) {
-            QJsonArray entry;
-            entry.append(gameID.trimmed());
-            entry.append(directory.trimmed());
-            newGameIDArray.append(entry);
-
-            QJsonObject newGameIDFile;
-            newGameIDFile["gameID"] = newGameIDArray;
-            configManager->updateGameIDFile(MainWindow::savesOrExtdata(), QJsonDocument(newGameIDFile));
+        if ((gameID != "") && (directory != ""))
+        {
+            configManager->addEntryToGameIDFile(MainWindow::savesOrExtdata(), gameID, directory);
             ui->saveGameIDButton->setDisabled(true);
         }
     }
 }
 
-void MainWindow::handleServerFetch() {
+void MainWindow::handleServerFetch()
+{
     ui->downloadGameIDComboBox->clear();
     citraholdServer->updateServerGameIDVariables();
 
-    QVector<QString>* serverGameIDs = (MainWindow::savesOrExtdata() == UploadType::SAVES) ? &citraholdServer->serverGameIDSaves : &citraholdServer->serverGameIDExtdata;
+    QVector<QString> *serverGameIDs = (MainWindow::savesOrExtdata() == UploadType::SAVES) ? &citraholdServer->serverGameIDSaves : &citraholdServer->serverGameIDExtdata;
 
     ui->downloadButton->setEnabled((serverGameIDs->size() > 0));
 
-    for (const QString &key : *serverGameIDs) {
+    for (const QString &key : *serverGameIDs)
+    {
 
         ui->downloadGameIDComboBox->addItem(key);
         qDebug() << "Key:" << key;
-
     }
 }
 
-void MainWindow::handleDownloadButton() {
+void MainWindow::handleDownloadButton()
+{
 
     // ui->downloadGameIDComboBox->currentText()
     //
+    qDebug() << "RGEJPGO";
     QJsonArray gameIDsOnFile = configManager->getGameIDFile(MainWindow::savesOrExtdata())["gameID"].toArray();
 
-    for (int i = 0; i < gameIDsOnFile.size(); ++i) {
-        QJsonValue value = gameIDsOnFile.at(i);
+    if (gameIDsOnFile.size() == 0)
+    {
+        showErrorBox("You need to add " + ui->downloadGameIDComboBox->currentText().trimmed() + " to your gameID list.");
 
-        bool gameIDpresent = false;
+        QString directory = QFileDialog::getExistingDirectory(this, tr("Open Directory"), ui->directoryText->toPlainText());
 
-        if (ui->downloadGameIDComboBox->currentText() == value[0].toString()) {
-            gameIDpresent = true;
-        }
+        // add directory to appropriate gameID file
+        if (directory != "")
+        {
+            configManager->addEntryToGameIDFile(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText(), directory);
 
-        if (!gameIDpresent) {
-            showErrorBox("You need to add " + ui->downloadGameIDComboBox->currentText() + " to your gameID list.");
-        } else {
-
-            QDateTime currentDateTime = QDateTime::currentDateTime();
-            QString formattedDateTime = currentDateTime.toString("yyyyMMdd-hhmmss");
-
-            configManager->copyDirectory(
-                configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()),
-                // clear oldSaveDirectory at some point
-                (configManager->getOldSaveDirectory(MainWindow::savesOrExtdata()) / std::filesystem::path ((ui->downloadGameIDComboBox->currentText() + "-" + formattedDateTime).toStdString()))
-            );
-
-            std::filesystem::remove_all(configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()));
-            if (!std::filesystem::exists(configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText())))
+            if (configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()) != "")
             {
-                std::filesystem::create_directories(configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()));
-            }
-
-            int downloadResponse = citraholdServer->download(
-                MainWindow::savesOrExtdata(),
-                ui->downloadGameIDComboBox->currentText(),
-                configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText())
-            );
-
-            if (downloadResponse) {
-                showSuccessBox("Download successful!");
-            } else {
-                showErrorBox("Something went wrong with the download...");
+                return handleDownloadButton();
             }
         }
     }
 
+    bool gameIDpresent = false;
+
+    for (int i = 0; i < gameIDsOnFile.size(); ++i)
+    {
+        QJsonValue value = gameIDsOnFile.at(i);
+        if (ui->downloadGameIDComboBox->currentText() == value[0].toString())
+        {
+            gameIDpresent = true;
+        }
+    }
+
+    if (!gameIDpresent)
+    {
+        showErrorBox("You need to add " + ui->downloadGameIDComboBox->currentText().trimmed() + " to your gameID list.");
+
+        QString directory = QFileDialog::getExistingDirectory(this, tr("Open Directory"), ui->directoryText->toPlainText());
+
+        // add directory to appropriate gameID file
+        if (directory != "")
+        {
+            configManager->addEntryToGameIDFile(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText(), directory);
+
+            if (configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()) != "")
+            {
+                return handleDownloadButton();
+            }
+        }
+    }
+    else
+    {
+
+        QDateTime currentDateTime = QDateTime::currentDateTime();
+        QString formattedDateTime = currentDateTime.toString("yyyyMMdd-hhmmss");
+
+        configManager->copyDirectory(
+            configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()),
+            (configManager->getOldSaveDirectory(MainWindow::savesOrExtdata()) / std::filesystem::path((ui->downloadGameIDComboBox->currentText() + "-" + formattedDateTime).toStdString())));
+
+        std::filesystem::remove_all(configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()));
+        if (!std::filesystem::exists(configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText())))
+        {
+            std::filesystem::create_directories(configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()));
+        }
+
+        int downloadResponse = citraholdServer->download(
+            MainWindow::savesOrExtdata(),
+            ui->downloadGameIDComboBox->currentText(),
+            configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()));
+
+        if (downloadResponse)
+        {
+            showSuccessBox("Download successful!");
+        }
+        else
+        {
+            showErrorBox("Something went wrong with the download...");
+        }
+        return;
+    }
 }
 
-void MainWindow::handleSaveExtdataRadios() {
+void MainWindow::handleSaveExtdataRadios()
+{
     // this is a particularly harsh way of stopping the user from accidentally sending extdata as saves or vice versa
 
-    if (!changedNameOrDirectorySinceSetAutomatically) {
+    if (!changedNameOrDirectorySinceSetAutomatically)
+    {
 
         ui->directoryText->setPlainText(QString::fromStdString(configManager->getLikelyCitraDirectory(MainWindow::savesOrExtdata()).u8string()));
         ui->gameIDText->setPlainText("");
     }
-    handleServerFetch();
+
+    // if on downloads
+    if (ui->stackedWidget->currentIndex() == 2)
+    {
+        handleServerFetch();
+        configManager->updateConfigProperty("lastDownloadedType", savesOrExtdata() == UploadType::SAVES ? "SAVES" : "EXTDATA");
+    }
 }
 
-
-void MainWindow::handleClearOldSavesButton() {
+void MainWindow::handleClearOldSavesButton()
+{
     std::filesystem::remove_all(configManager->getOldSaveDirectory(MainWindow::savesOrExtdata()));
 }

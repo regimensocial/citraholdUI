@@ -28,11 +28,14 @@ private slots:
     void handleServerFetch();
     void handleDownloadButton();
     void handleClearOldSavesButton();
+    void handleToggleModeButton();
 
 private:
     Ui::MainWindow *ui;
     ConfigManager *configManager;
     CitraholdServer *citraholdServer;
+
+    void handleSuccessfulLogin();
     void openGameIDSelector();
     void addGameIDToFile();
     void showErrorBox(QString error = "");
@@ -40,6 +43,7 @@ private:
     UploadType savesOrExtdata();
 
     void handleSaveExtdataRadios();
+
 
     bool changedNameOrDirectorySinceSetAutomatically;
 

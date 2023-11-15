@@ -16,15 +16,18 @@ std::filesystem::path ConfigManager::getSaveDirectory() const
     return saveDirectory;
 }
 
-std::filesystem::path ConfigManager::getLikelyCitraDirectory(UploadType type) const
+std::filesystem::path ConfigManager::getLikelyCitraDirectory(UploadType type)
 {
     std::filesystem::path directory = citraDirectory;
 
-    if (type == UploadType::SAVES) {
+    if (type == UploadType::SAVES)
+    {
 
-        directory /=  "title";
-    } else {
-        directory /=  "extdata";
+        directory /= "title";
+    }
+    else
+    {
+        directory /= "extdata";
     }
 
     return directory;
@@ -42,10 +45,10 @@ void ConfigManager::setToken(QString token)
 
     updateConfigFile(config);
 
-    //emit checkTokenInConfig("Test");
+    // emit checkTokenInConfig("Test");
 }
 
-QJsonDocument ConfigManager::getConfig() const
+QJsonDocument ConfigManager::getConfig()
 {
     // config file is saveDirectory/config.json
 
@@ -62,6 +65,11 @@ QJsonDocument ConfigManager::getConfig() const
         json["serverAddress"] = "http://192.168.1.152:3000";
         json["token"] = "unknown???";
         json["_note"] = "keep your token private!";
+        json["defaultCitraDirectory"] = QString(citraDirectory.string().c_str());
+        json["lastUploadedGameID"] = "";
+        json["lastUploadedType"] = "SAVES";
+        json["lastDownloadedType"] = "SAVES";
+        json["lastMode"] = "UPLOAD";
 
         QJsonDocument jsonDoc(json);
         QString jsonString = jsonDoc.toJson();
@@ -78,11 +86,10 @@ QJsonDocument ConfigManager::getConfig() const
         file.close();
         return QJsonDocument::fromJson(fileContents.c_str());
     }
-
-
 }
 
-QJsonDocument ConfigManager::getGameIDFile(UploadType type) {
+QJsonDocument ConfigManager::getGameIDFile(UploadType type)
+{
     // config file is saveDirectory/config.json
 
     // If the config file doesn't exist, create it
@@ -109,12 +116,15 @@ QJsonDocument ConfigManager::getGameIDFile(UploadType type) {
         file.seekp(0);
         std::string fileContents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
         file.close();
-        return QJsonDocument::fromJson(fileContents.c_str());
+
+        QJsonDocument fileAsObject = QJsonDocument::fromJson(fileContents.c_str());
+        // qDebug() << "From file! " << fileAsObject["gameID"].toArray().size();
+        return fileAsObject;
     }
 }
 
-void ConfigManager::updateGameIDFile(UploadType type, QJsonDocument newFile) {
-
+void ConfigManager::updateGameIDFile(UploadType type, QJsonDocument newFile)
+{
 
     std::filesystem::path filePath = saveDirectory / (type == UploadType::SAVES ? "gameIDSaves.json" : "gameIDExtdata.json");
 
@@ -133,6 +143,57 @@ void ConfigManager::updateGameIDFile(UploadType type, QJsonDocument newFile) {
     }
 }
 
+void ConfigManager::updateConfigProperty(QString property, QJsonValue value)
+{
+    QJsonDocument config = getConfig();
+
+    QJsonObject configObject = config.object();
+
+    configObject[property] = value;
+
+    config = QJsonDocument(configObject);
+
+    updateConfigFile(config);
+}
+
+QString ConfigManager::getConfigProperty(QString property)
+{
+    QJsonDocument config = getConfig();
+
+    QJsonObject configObject = config.object();
+
+    return configObject[property].toString();
+}
+
+void ConfigManager::addEntryToGameIDFile(UploadType type, QString gameID, QString gameName)
+{
+    // check for duplicates first
+
+    QJsonDocument gameIDFile = getGameIDFile(type);
+
+    QJsonArray gameIDArray = gameIDFile["gameID"].toArray();
+
+    qDebug() << gameID;
+    if (getGamePathFromGameID(type, gameID.trimmed()) != "")
+    {
+        qDebug() << "Game ID already exists!";
+        return;
+    }
+
+    QJsonArray newEntry;
+    newEntry.append(gameID.trimmed());
+    newEntry.append(gameName.trimmed());
+
+    gameIDArray.append(newEntry);
+
+    QJsonObject gameIDFileAsObject = gameIDFile.object();
+    gameIDFileAsObject["gameID"] = gameIDArray;
+    gameIDFile = QJsonDocument(gameIDFileAsObject);
+    updateGameIDFile(type, gameIDFile);
+
+
+}
+
 void ConfigManager::updateConfigFile(QJsonDocument newConfig)
 {
     std::filesystem::path filePath = saveDirectory / "config.json";
@@ -141,7 +202,7 @@ void ConfigManager::updateConfigFile(QJsonDocument newConfig)
 
     if (file.is_open())
     {
-        
+
         QString jsonString = newConfig.toJson();
         file << jsonString.toStdString();
         file.close();
@@ -174,7 +235,6 @@ void ConfigManager::initialise()
     citraDirectory /= "Application Support";
     citraDirectory /= "Citra";
 
-
 #else
     // Assume all other platforms are Linux
     saveDirectory = std::getenv("HOME");
@@ -187,7 +247,6 @@ void ConfigManager::initialise()
     citraDirectory /= "citra-emu";
 
 #endif
-
 
     citraDirectory /= "sdmc";
     citraDirectory /= "Nintendo 3DS";
@@ -214,22 +273,32 @@ void ConfigManager::initialise()
         citraDirectory = ""; // Return an empty path if the Citra directory doesn't exist
     }
 
-    config = getConfig();
+    QJsonDocument config = getConfig();
+
+    qDebug() << "Citra directory: " << QString(citraDirectory.string().c_str());
+    qDebug() << "Citra directory 2: " << (config["defaultCitraDirectory"].toString().toStdString());
+
+    if (getConfigProperty("defaultCitraDirectory").toStdString() != citraDirectory)
+    {
+        citraDirectory = std::filesystem::path(getConfigProperty("defaultCitraDirectory").toStdString());
+    }
+
     getGameIDFile(UploadType::EXTDATA);
     getGameIDFile(UploadType::SAVES);
-
 }
 
-std::filesystem::path ConfigManager::getGamePathFromGameID(UploadType type, QString gameID) {
-
+std::filesystem::path ConfigManager::getGamePathFromGameID(UploadType type, QString gameID)
+{
 
     QJsonObject gameIDFileAsObject = getGameIDFile(type).object();
 
     QJsonArray gameIDArray = gameIDFileAsObject["gameID"].toArray();
 
-    for (int i = 0; i < gameIDArray.size(); ++i) {
+    for (int i = 0; i < gameIDArray.size(); ++i)
+    {
         QJsonValue value = gameIDArray.at(i);
-        if (gameID == value[0].toString()) {
+        if (gameID == value[0].toString())
+        {
             return std::filesystem::path(value[1].toString().toStdString());
         }
     }
@@ -237,41 +306,55 @@ std::filesystem::path ConfigManager::getGamePathFromGameID(UploadType type, QStr
     return "";
 }
 
-QString ConfigManager::getToken() const {
+QString ConfigManager::getToken()
+{
     return getConfig()["token"].toString();
 }
 
-bool ConfigManager::loggedIn() {
+bool ConfigManager::loggedIn()
+{
     return userID != "invalid";
 }
 
-bool ConfigManager::copyDirectory(const std::filesystem::path& source, const std::filesystem::path& destination) {
-    try {
-        if (!std::filesystem::exists(source) || !std::filesystem::is_directory(source)) {
+bool ConfigManager::copyDirectory(const std::filesystem::path &source, const std::filesystem::path &destination)
+{
+    try
+    {
+        if (!std::filesystem::exists(source) || !std::filesystem::is_directory(source))
+        {
             qDebug() << "Source directory doesn't exist or is not a directory.";
             return false;
         }
 
-        if (!std::filesystem::exists(destination)) {
-            if (!std::filesystem::create_directories(destination)) {
+        if (!std::filesystem::exists(destination))
+        {
+            if (!std::filesystem::create_directories(destination))
+            {
                 qDebug() << "Failed to create the destination directory.";
                 return false;
             }
         }
 
-        for (const auto& entry : std::filesystem::directory_iterator(source)) {
+        for (const auto &entry : std::filesystem::directory_iterator(source))
+        {
             const std::filesystem::path entryPath = entry.path();
             const std::filesystem::path destinationPath = destination / entryPath.filename();
 
-            if (std::filesystem::is_directory(entryPath)) {
-                if (!copyDirectory(entryPath, destinationPath)) {
+            if (std::filesystem::is_directory(entryPath))
+            {
+                if (!copyDirectory(entryPath, destinationPath))
+                {
                     return false;
                 }
-            } else if (std::filesystem::is_regular_file(entryPath)) {
+            }
+            else if (std::filesystem::is_regular_file(entryPath))
+            {
                 std::filesystem::copy_file(entryPath, destinationPath, std::filesystem::copy_options::overwrite_existing);
             }
         }
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         std::cerr << "An error occurred: " << e.what() << std::endl;
         return false;
     }
@@ -279,6 +362,7 @@ bool ConfigManager::copyDirectory(const std::filesystem::path& source, const std
     return true;
 }
 
-std::filesystem::path ConfigManager::getOldSaveDirectory(UploadType type) const {
+std::filesystem::path ConfigManager::getOldSaveDirectory(UploadType type) const
+{
     return saveDirectory / ((type == UploadType::SAVES) ? "oldSaves" : "oldExtdata");
 }
