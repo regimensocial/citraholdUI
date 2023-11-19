@@ -33,3 +33,10 @@ DISTFILES += \
 
 RESOURCES += \
     banner.qrc
+
+TARGET = Citrahold
+TEMPLATE = app
+
+VERSION = 1.0.1
+
+DEFINES += APP_VERSION=\\\"$$VERSION\\\"
