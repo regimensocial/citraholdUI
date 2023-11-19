@@ -660,7 +660,7 @@ void MainWindow::handleDownloadButton()
         }
         else
         {
-            showErrorBox("Something went wrong with the download... " + downloadResponse);
+            showErrorBox("Something went wrong with the download... ");
         }
         return;
     }

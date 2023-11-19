@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/banner">
         <file>citraholdminibanner.png</file>
+        <file>icon.png</file>
     </qresource>
 </RCC>
