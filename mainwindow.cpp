@@ -463,9 +463,14 @@ void MainWindow::handleUploadButton()
 
     QString formattedDateTime = currentDateTime.toString("yyyyMMdd-hhmmss");
 
+    QVector<int> responses;
+
     while (!directoriesToVisit.isEmpty())
     {
         QDir currentDir = directoriesToVisit.dequeue();
+
+        citraholdServer->upload(MainWindow::savesOrExtdata(), gameID + "/" + QDir(directory).relativeFilePath(currentDir.path()) + "/" + "citraholdDirectoryDummy", "citraholdDirectoryDummy");
+
         QStringList entryList = currentDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
 
         for (const QString &entry : entryList)
@@ -485,7 +490,7 @@ void MainWindow::handleUploadButton()
         }
     }
 
-    QVector<int> responses;
+
     for (const QDir &filePath : allFilesFull)
     {
         QFile file(filePath.path());
@@ -655,7 +660,7 @@ void MainWindow::handleDownloadButton()
         }
         else
         {
-            showErrorBox("Something went wrong with the download...");
+            showErrorBox("Something went wrong with the download... " + downloadResponse);
         }
         return;
     }
