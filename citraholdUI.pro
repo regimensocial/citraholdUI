@@ -37,6 +37,6 @@ RESOURCES += \
 TARGET = Citrahold
 TEMPLATE = app
 
-VERSION = 1.0.1
+VERSION = 1.0.0
 
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
