@@ -134,13 +134,11 @@ void MainWindow::handleToggleModeButton()
     {
         ui->stackedWidget->setCurrentWidget(ui->downloadWidget);
         ui->switchModeButton->setText("Switch to Upload");
-        configManager->updateConfigProperty("lastMode", "UPLOAD");
     }
     else
     {
         ui->stackedWidget->setCurrentWidget(ui->uploadWidget);
         ui->switchModeButton->setText("Switch to Download");
-        configManager->updateConfigProperty("lastMode", "DOWNLOAD");
     }
 }
 
@@ -239,7 +237,7 @@ void MainWindow::handleSuccessfulLogin()
 
     QJsonObject config = configManager->getConfig().object();
 
-    if (configManager->getConfigProperty("lastMode") == "UPLOAD")
+    if (configManager->getConfigProperty("lastMode") == "DOWNLOAD")
     {
         handleToggleModeButton();
     }
@@ -412,6 +410,7 @@ void MainWindow::handleUploadButton()
 
         configManager->updateConfigProperty("lastType", (savesOrExtdata() == UploadType::SAVES ? "SAVES" : "EXTDATA"));
         configManager->updateConfigProperty("lastUploadedGameID", ui->uploadGameIDComboBox->currentText());
+        configManager->updateConfigProperty("lastMode", "UPLOAD");
 
         handleServerFetch();
     }
@@ -502,6 +501,7 @@ void MainWindow::handleDownloadButton()
 
             configManager->updateConfigProperty("lastType", (savesOrExtdata() == UploadType::SAVES ? "SAVES" : "EXTDATA"));
             configManager->updateConfigProperty("lastDownloadedGameID", ui->downloadGameIDComboBox->currentText());
+            configManager->updateConfigProperty("lastMode", "DOWNLOAD");
         }
         else
         {
