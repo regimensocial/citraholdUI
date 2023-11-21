@@ -219,10 +219,8 @@ void GameIDManager::addGameIDToFile(bool existing)
     resetDirectory(false);
 
     retrieveGameIDList();
-    ((MainWindow *)parentWidget())->retrieveGameIDList(
-        gameID
-    );
-    
+    ((MainWindow *)parentWidget())->retrieveGameIDList(gameID);
+
     if (existing)
     {
         ui->gameIDComboBox->setCurrentText(gameID);
@@ -265,6 +263,12 @@ void GameIDManager::retrieveGameIDList()
     {
         ui->gameIDComboBox->setCurrentText(previousGameID);
     }
+
+    ui->deleteGameIDButton->setDisabled(ui->gameIDComboBox->count() == 0);
+    ui->existingDirectoryButton->setDisabled(ui->gameIDComboBox->count() == 0);
+    ui->existingDirectoryText->setDisabled(ui->gameIDComboBox->count() == 0);
+    ui->existingGameIDText->setDisabled(ui->gameIDComboBox->count() == 0);
+
     handleExistingGameIDSelection();
 }
 
