@@ -36,6 +36,8 @@ GameIDManager::GameIDManager(QWidget *parent, ConfigManager *configManager) : QD
     resetDirectory();
     ui->addGameIDButton->setDisabled(true);
     ui->stackedWidget->setCurrentIndex(0);
+
+    this->setHidden(true);
 }
 
 GameIDManager::~GameIDManager()
@@ -131,7 +133,7 @@ void GameIDManager::handleDirectoryButton(bool openSelection, bool existing)
     {
         // check if directory string contains "extdata"
 
-        if (!existing && directory.contains("extdata") && uploadType != UploadType::EXTDATA)
+        if (!this->isHidden() && !existing && directory.contains("extdata") && uploadType != UploadType::EXTDATA)
         {
             QMessageBox::StandardButton reply;
             reply = QMessageBox::question(this, "Extdata Detected", "This might be extdata. Would you like to switch to extdata mode?", QMessageBox::Yes | QMessageBox::No);

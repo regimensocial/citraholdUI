@@ -104,7 +104,7 @@ MainWindow::~MainWindow()
 void MainWindow::openGameIDSelector()
 {
     gameIDManager->setModal(true);
-    gameIDManager->exec();
+    gameIDManager->setHidden(false);
 }
 
 void MainWindow::setUploadType(UploadType uploadType, bool ignoreOther)
@@ -446,7 +446,7 @@ void MainWindow::handleDownloadGameIDMissing()
 {
     showErrorBox("You need to add " + ui->downloadGameIDComboBox->currentText().trimmed() + " to your gameID list.");
     gameIDManager->setGameID(ui->downloadGameIDComboBox->currentText());
-    gameIDManager->exec();
+    gameIDManager->setHidden(false);
 }
 
 void MainWindow::handleDownloadButton()
