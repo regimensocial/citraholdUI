@@ -283,7 +283,7 @@ void GameIDManager::retrieveGameIDList()
 void GameIDManager::handleExistingGameIDSelection()
 {
     QString gameID = ui->gameIDComboBox->currentText();
-    std::__1::__fs::filesystem::path directory = configManager->getGamePathFromGameID(uploadType, gameID);
+    std::filesystem::path directory = configManager->getGamePathFromGameID(uploadType, gameID);
 
     ui->existingGameIDText->setPlainText(gameID);
     ui->existingDirectoryText->setPlainText(directory.string().c_str());
