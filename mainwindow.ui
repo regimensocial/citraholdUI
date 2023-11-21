@@ -37,7 +37,7 @@
     <property name="currentIndex">
      <number>0</number>
     </property>
-    <widget class="QWidget" name="login">
+    <widget class="QWidget" name="loginWidget">
      <widget class="QLabel" name="label_2">
       <property name="geometry">
        <rect>
@@ -107,7 +107,7 @@
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="upload">
+    <widget class="QWidget" name="uploadWidget">
      <widget class="QPushButton" name="selectDirectoryButton">
       <property name="geometry">
        <rect>
@@ -230,7 +230,7 @@
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="download">
+    <widget class="QWidget" name="downloadWidget">
      <widget class="QPushButton" name="downloadButton">
       <property name="geometry">
        <rect>

@@ -152,7 +152,23 @@ int CitraholdServer::upload(UploadType type, QString filePath, QString base64Dat
     data["data"] = base64Data;
 
     // this will return a full token
-    responsePair response = sendRequest(this->serverAddress + (type == UploadType::SAVES ? "/UploadSaves" : "/UploadExtdata"), &data);
+    responsePair response = sendRequest(this->serverAddress + (type == UploadType::SAVES ? "/uploadSaves" : "/uploadExtdata"), &data);
+
+    qDebug() << "uploadResponse " << response.first;
+
+    return response.first;
+}
+
+int CitraholdServer::uploadMultiple(UploadType type, QJsonArray files)
+{
+
+    QJsonObject data;
+
+    data["token"] = this->token;
+    data["multi"] = files;
+
+    // this will return a full token
+    responsePair response = sendRequest(this->serverAddress + (type == UploadType::SAVES ? "/uploadMultiSaves" : "/uploadMultiExtdata"), &data);
 
     qDebug() << "uploadResponse " << response.first;
 
@@ -208,7 +224,7 @@ int CitraholdServer::download(UploadType type, QString gameID, std::filesystem::
                     if (!std::filesystem::exists(downloadPath.toStdString()) || !std::filesystem::is_directory(downloadPath.toStdString()))
                     {
                         std::filesystem::path dir = downloadPath.toStdString();
-                        
+
                         if (std::filesystem::create_directories(dir.parent_path()))
                         {
                             qDebug() << "Directory created successfully.";
@@ -235,6 +251,77 @@ int CitraholdServer::download(UploadType type, QString gameID, std::filesystem::
         return successfulSoFar;
     }
     return 0;
+}
+
+int CitraholdServer::downloadMultiple(UploadType type, QString gameID, std::filesystem::path gamePath)
+{
+    QJsonObject data;
+
+    data["token"] = this->token;
+    data["game"] = gameID;
+
+    responsePair response = sendRequest(this->serverAddress + (type == UploadType::EXTDATA ? "/downloadMultiExtdata" : "/downloadMultiSaves"), &data);
+    if (response.first == 200)
+    {
+        bool successfulSoFar = true;
+
+        QJsonDocument responseJSON = (response.second);
+        QJsonArray files = responseJSON["files"].toArray();
+        int numberOfItems = files.size();
+        int itemNumber = 0;
+
+        std::cout << "Retrieved " << numberOfItems << " files\n";
+
+        for (const QJsonValueRef &element : files)
+        {
+            if (!successfulSoFar)
+            {
+                break;
+            }
+
+            itemNumber++;
+
+            std::string filename = element[0].toString().toStdString();
+            QString base64Data = element[1].toString();
+
+            std::filesystem::path downloadPath = (gamePath / filename).string();
+
+            QByteArray base64DataDecoded = QByteArray::fromBase64(base64Data.toUtf8());
+
+            // write the file
+            std::filesystem::path parentPath = downloadPath.parent_path();
+
+            if (!std::filesystem::exists(parentPath))
+            {
+                std::filesystem::create_directories(parentPath);
+            }
+
+            if (filename.find("citraholdDirectoryDummy") == std::string::npos)
+            {
+
+                QFile file(downloadPath);
+
+                if (file.open(QIODevice::WriteOnly))
+                {
+                    file.write(base64DataDecoded);
+
+                    file.close();
+                }
+                else
+                {
+                    qDebug() << "Error opening the file for writing.";
+                }
+            }
+            else
+            {
+                std::cout << "[" << itemNumber << "/" << numberOfItems << "] "
+                          << "Ignoring dummy file " << filename << "\n";
+            }
+        }
+
+        return successfulSoFar;
+    }
+    return false;
 }
 
 void CitraholdServer::updateServerGameIDVariables()

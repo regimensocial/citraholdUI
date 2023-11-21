@@ -81,7 +81,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     }
     else
     {
-        ui->stackedWidget->setCurrentIndex(0);
+        ui->stackedWidget->setCurrentWidget(ui->uploadWidget);
         ui->selectionBox->hide();
         // at some point, we'll need to check if the server is running
     }
@@ -236,13 +236,13 @@ void MainWindow::handleToggleModeButton()
 {
     if (ui->stackedWidget->currentIndex() == 1)
     {
-        ui->stackedWidget->setCurrentIndex(2);
+        ui->stackedWidget->setCurrentWidget(ui->downloadWidget);
         ui->switchModeButton->setText("Switch to Upload");
         configManager->updateConfigProperty("lastMode", "UPLOAD");
     }
     else
     {
-        ui->stackedWidget->setCurrentIndex(1);
+        ui->stackedWidget->setCurrentWidget(ui->uploadWidget);
         ui->switchModeButton->setText("Switch to Download");
         configManager->updateConfigProperty("lastMode", "DOWNLOAD");
     }
@@ -278,7 +278,7 @@ void MainWindow::handleVerifyButtonClicked()
                 ui->tokenText->setPlainText("");
                 ui->tokenOutput->setText("Successfully authenticated.");
 
-                ui->stackedWidget->setCurrentIndex(1);
+                ui->stackedWidget->setCurrentWidget(ui->uploadWidget);
                 ui->selectionBox->show();
             }
             else
@@ -337,7 +337,7 @@ void MainWindow::handleVerifyButtonClicked()
 
 void MainWindow::handleSuccessfulLogin()
 {
-    ui->stackedWidget->setCurrentIndex(1);
+    ui->stackedWidget->setCurrentWidget(ui->uploadWidget);
     ui->selectionBox->show();
     ui->statusbar->showMessage("Logged in.");
     handleServerFetch();
@@ -443,8 +443,6 @@ void MainWindow::handleUploadButton()
 
     QString directory = ui->directoryText->toPlainText();
 
-    // todo: check directory is valid
-
     QString gameID = ui->gameIDText->toPlainText();
 
     if (gameID.trimmed() == "")
@@ -469,8 +467,6 @@ void MainWindow::handleUploadButton()
     {
         QDir currentDir = directoriesToVisit.dequeue();
 
-        citraholdServer->upload(MainWindow::savesOrExtdata(), gameID + "/" + QDir(directory).relativeFilePath(currentDir.path()) + "/" + "citraholdDirectoryDummy", "citraholdDirectoryDummy");
-
         QStringList entryList = currentDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
 
         for (const QString &entry : entryList)
@@ -479,6 +475,9 @@ void MainWindow::handleUploadButton()
             if (QFileInfo(fullPath).isDir())
             {
                 directoriesToVisit.enqueue(QDir(fullPath));
+
+                QString relativePath = QDir(directory).relativeFilePath(fullPath) + "/" + "citraholdDirectoryDummy";
+                allFilesRelative.enqueue(relativePath);
             }
             else
             {
@@ -490,6 +489,7 @@ void MainWindow::handleUploadButton()
         }
     }
 
+    QJsonArray allFilesArray;
 
     for (const QDir &filePath : allFilesFull)
     {
@@ -502,26 +502,21 @@ void MainWindow::handleUploadButton()
 
             QString base64Data = QString(fileData.toBase64());
 
-            // CHPC means Citrahold PC, the one from the 3DS will have CHDS instead
-            responses.append(citraholdServer->upload(MainWindow::savesOrExtdata(), gameID + "/" + allFilesRelative.first().path(), base64Data));
+            QJsonArray fileEntry;
+            fileEntry.append(gameID + "/" + allFilesRelative.first().path());
+            fileEntry.append(base64Data);
+
+            allFilesArray.append(fileEntry);
         }
         else
         {
-            // Handle the case where the file couldn't be opened????
+            qDebug() << "Failed to open file.";
         }
 
         allFilesRelative.removeFirst();
     }
 
-    int responseCode = 0;
-    for (int value : responses)
-    {
-        responseCode = value;
-        if (value != 201)
-        {
-            break; // Exit the loop as soon as a non-201 value is encountered
-        }
-    }
+    int responseCode = citraholdServer->uploadMultiple(MainWindow::savesOrExtdata(), allFilesArray);
 
     if (responseCode == 201)
     {
@@ -649,7 +644,7 @@ void MainWindow::handleDownloadButton()
             std::filesystem::create_directories(configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()));
         }
 
-        int downloadResponse = citraholdServer->download(
+        int downloadResponse = citraholdServer->downloadMultiple(
             MainWindow::savesOrExtdata(),
             ui->downloadGameIDComboBox->currentText(),
             configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()));

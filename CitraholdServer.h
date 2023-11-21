@@ -34,7 +34,9 @@ public:
     bool checkServerIsOnline();
 
     int upload(UploadType type, QString filePath, QString base64Data);
+    int uploadMultiple(UploadType type, QJsonArray files);
     int download(UploadType type, QString gameID, std::filesystem::path gamePath);
+    int downloadMultiple(UploadType type, QString gameID, std::filesystem::path gamePath);
 
 private:
     QString serverAddress;
