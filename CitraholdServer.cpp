@@ -255,12 +255,16 @@ int CitraholdServer::download(UploadType type, QString gameID, std::filesystem::
 
 int CitraholdServer::downloadMultiple(UploadType type, QString gameID, std::filesystem::path gamePath)
 {
+
+
     QJsonObject data;
 
     data["token"] = this->token;
     data["game"] = gameID;
 
     responsePair response = sendRequest(this->serverAddress + (type == UploadType::EXTDATA ? "/downloadMultiExtdata" : "/downloadMultiSaves"), &data);
+
+    qDebug() << response.first;
     if (response.first == 200)
     {
         bool successfulSoFar = true;
@@ -270,7 +274,8 @@ int CitraholdServer::downloadMultiple(UploadType type, QString gameID, std::file
         int numberOfItems = files.size();
         int itemNumber = 0;
 
-        std::cout << "Retrieved " << numberOfItems << " files\n";
+        qDebug() << "Retrieved " << numberOfItems << " files\n";
+
 
         for (const QJsonValueRef &element : files)
         {
@@ -314,7 +319,7 @@ int CitraholdServer::downloadMultiple(UploadType type, QString gameID, std::file
             }
             else
             {
-                std::cout << "[" << itemNumber << "/" << numberOfItems << "] "
+                qDebug() << "[" << itemNumber << "/" << numberOfItems << "] "
                           << "Ignoring dummy file " << filename << "\n";
             }
         }

@@ -344,12 +344,6 @@ void MainWindow::handleUploadButton()
     QQueue<QDir> allFilesFull;
     QQueue<QDir> allFilesRelative;
 
-    QDateTime currentDateTime = QDateTime::currentDateTime();
-
-    QString formattedDateTime = currentDateTime.toString("yyyyMMdd-hhmmss");
-
-    QVector<int> responses;
-
     while (!directoriesToVisit.isEmpty())
     {
         QDir currentDir = directoriesToVisit.dequeue();
@@ -458,6 +452,7 @@ void MainWindow::handleDownloadButton()
     if (gameIDsOnFile.size() == 0)
     {
         handleDownloadGameIDMissing();
+        return;
     }
 
     bool gameIDpresent = false;
@@ -474,6 +469,7 @@ void MainWindow::handleDownloadButton()
     if (!gameIDpresent)
     {
         handleDownloadGameIDMissing();
+        return;
     }
     else
     {
