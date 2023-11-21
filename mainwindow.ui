@@ -35,7 +35,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="loginWidget">
      <widget class="QLabel" name="label_2">
@@ -301,7 +301,7 @@
       <rect>
        <x>10</x>
        <y>0</y>
-       <width>311</width>
+       <width>301</width>
        <height>41</height>
       </rect>
      </property>
@@ -343,7 +343,7 @@
      <x>0</x>
      <y>0</y>
      <width>361</width>
-     <height>24</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAbout">
