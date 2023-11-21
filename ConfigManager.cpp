@@ -62,8 +62,8 @@ QJsonDocument ConfigManager::getConfig()
         json["_note"] = "keep your token private!";
         json["defaultCitraDirectory"] = QString(citraDirectory.string().c_str());
         json["lastUploadedGameID"] = "";
-        json["lastUploadedType"] = "SAVES";
-        json["lastDownloadedType"] = "SAVES";
+        json["lastDownloadedGameID"] = "";
+        json["lastType"] = "SAVES";
         json["lastMode"] = "UPLOAD";
 
         QJsonDocument jsonDoc(json);
@@ -351,4 +351,25 @@ bool ConfigManager::copyDirectory(const std::filesystem::path &source, const std
 std::filesystem::path ConfigManager::getOldSaveDirectory(UploadType type) const
 {
     return saveDirectory / ((type == UploadType::SAVES) ? "oldSaves" : "oldExtdata");
+}
+
+void ConfigManager::removeEntryFromGameIDFile(UploadType type, QString gameID) {
+    QJsonDocument gameIDFile = getGameIDFile(type);
+
+    QJsonArray gameIDArray = gameIDFile["gameID"].toArray();
+
+    for (int i = 0; i < gameIDArray.size(); ++i)
+    {
+        QJsonValue value = gameIDArray.at(i);
+        if (gameID == value[0].toString())
+        {
+            gameIDArray.removeAt(i);
+            break;
+        }
+    }
+
+    QJsonObject gameIDFileAsObject = gameIDFile.object();
+    gameIDFileAsObject["gameID"] = gameIDArray;
+    gameIDFile = QJsonDocument(gameIDFileAsObject);
+    updateGameIDFile(type, gameIDFile);
 }

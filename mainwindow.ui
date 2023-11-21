@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>371</width>
-    <height>421</height>
+    <width>361</width>
+    <height>399</height>
    </rect>
   </property>
   <property name="font">
@@ -28,21 +28,21 @@
    <widget class="QStackedWidget" name="stackedWidget">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>60</y>
+      <x>-10</x>
+      <y>120</y>
       <width>371</width>
-      <height>321</height>
+      <height>271</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="loginWidget">
      <widget class="QLabel" name="label_2">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>160</y>
+        <x>40</x>
+        <y>70</y>
         <width>171</width>
         <height>16</height>
        </rect>
@@ -54,8 +54,8 @@
      <widget class="QLabel" name="tokenOutput">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>270</y>
+        <x>40</x>
+        <y>180</y>
         <width>401</width>
         <height>16</height>
        </rect>
@@ -67,9 +67,9 @@
      <widget class="QPushButton" name="verifyButton">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>230</y>
-        <width>311</width>
+        <x>40</x>
+        <y>140</y>
+        <width>301</width>
         <height>41</height>
        </rect>
       </property>
@@ -80,9 +80,9 @@
      <widget class="QPlainTextEdit" name="tokenText">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>190</y>
-        <width>311</width>
+        <x>40</x>
+        <y>100</y>
+        <width>301</width>
         <height>31</height>
        </rect>
       </property>
@@ -90,81 +90,39 @@
        <string>Enter your shorthand token</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_7">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>-30</y>
-        <width>341</width>
-        <height>221</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="pixmap">
-       <pixmap resource="banner.qrc">:/banner/citraholdminibanner.png</pixmap>
-      </property>
-     </widget>
     </widget>
     <widget class="QWidget" name="uploadWidget">
-     <widget class="QPushButton" name="selectDirectoryButton">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>30</y>
-        <width>311</width>
-        <height>32</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Select Directory</string>
-      </property>
-     </widget>
-     <widget class="QPlainTextEdit" name="directoryText">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>70</y>
-        <width>311</width>
-        <height>91</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QPlainTextEdit" name="gameIDText">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>190</y>
-        <width>250</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>Ideally, keep this the same per game. So like if you're uploading another Pokemon Y save, don't change the name from the previous save. Alright?</string>
-      </property>
-      <property name="lineWrapMode">
-       <enum>QPlainTextEdit::NoWrap</enum>
-      </property>
-     </widget>
      <widget class="QPushButton" name="uploadButton">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>260</y>
-        <width>311</width>
-        <height>51</height>
+        <x>40</x>
+        <y>130</y>
+        <width>301</width>
+        <height>101</height>
        </rect>
       </property>
       <property name="text">
        <string>Upload Save</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_3">
+     <widget class="QLabel" name="label_5">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>170</y>
+        <x>40</x>
+        <y>10</y>
+        <width>131</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Upload a save below.</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_8">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>50</y>
         <width>311</width>
         <height>16</height>
        </rect>
@@ -180,64 +138,33 @@
        </font>
       </property>
       <property name="text">
-       <string>Enter an ID/name for this game</string>
+       <string>Game ID</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="saveGameIDButton">
+     <widget class="QComboBox" name="uploadGameIDComboBox">
       <property name="geometry">
        <rect>
-        <x>284</x>
-        <y>186</y>
-        <width>56</width>
-        <height>65</height>
+        <x>40</x>
+        <y>70</y>
+        <width>301</width>
+        <height>32</height>
        </rect>
       </property>
-      <property name="text">
-       <string>Add</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="selectPreviousGameIDsButton">
-      <property name="geometry">
-       <rect>
-        <x>29</x>
-        <y>220</y>
-        <width>252</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <family>.AppleSystemUIFont</family>
-        <pointsize>12</pointsize>
-        <italic>false</italic>
-       </font>
-      </property>
-      <property name="text">
-       <string>Select from previous ID/names</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_5">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>10</y>
-        <width>131</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Upload a save below.</string>
-      </property>
+      <item>
+       <property name="text">
+        <string>test option 1</string>
+       </property>
+      </item>
      </widget>
     </widget>
     <widget class="QWidget" name="downloadWidget">
      <widget class="QPushButton" name="downloadButton">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>260</y>
-        <width>311</width>
-        <height>51</height>
+        <x>40</x>
+        <y>160</y>
+        <width>301</width>
+        <height>71</height>
        </rect>
       </property>
       <property name="text">
@@ -247,10 +174,10 @@
      <widget class="QPushButton" name="fetchButton">
       <property name="geometry">
        <rect>
-        <x>30</x>
+        <x>40</x>
         <y>30</y>
-        <width>311</width>
-        <height>71</height>
+        <width>301</width>
+        <height>51</height>
        </rect>
       </property>
       <property name="text">
@@ -260,9 +187,9 @@
      <widget class="QLabel" name="label_4">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>140</y>
-        <width>311</width>
+        <x>40</x>
+        <y>100</y>
+        <width>301</width>
         <height>16</height>
        </rect>
       </property>
@@ -283,35 +210,30 @@
      <widget class="QComboBox" name="downloadGameIDComboBox">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>160</y>
+        <x>40</x>
+        <y>120</y>
         <width>301</width>
         <height>32</height>
        </rect>
       </property>
-      <item>
-       <property name="text">
-        <string>test option 1</string>
-       </property>
-      </item>
      </widget>
      <widget class="QPushButton" name="clearOldSavesButton">
       <property name="geometry">
        <rect>
         <x>140</x>
-        <y>190</y>
+        <y>80</y>
         <width>201</width>
         <height>31</height>
        </rect>
       </property>
       <property name="text">
-       <string>Clear Old Saves on This System</string>
+       <string>Clear old saves on this system</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_6">
       <property name="geometry">
        <rect>
-        <x>30</x>
+        <x>40</x>
         <y>10</y>
         <width>161</width>
         <height>16</height>
@@ -329,54 +251,31 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>22</y>
+      <x>20</x>
+      <y>20</y>
       <width>311</width>
-      <height>61</height>
+      <height>91</height>
      </rect>
     </property>
     <widget class="QRadioButton" name="saveRadio">
      <property name="geometry">
       <rect>
-       <x>0</x>
-       <y>20</y>
-       <width>99</width>
+       <x>10</x>
+       <y>50</y>
+       <width>61</width>
        <height>20</height>
       </rect>
      </property>
      <property name="text">
-      <string>save</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>161</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>.AppleSystemUIFont</family>
-       <italic>false</italic>
-       <bold>true</bold>
-       <underline>false</underline>
-       <strikeout>false</strikeout>
-       <kerning>false</kerning>
-      </font>
-     </property>
-     <property name="text">
-      <string>Make sure this is correct</string>
+      <string>saves</string>
      </property>
     </widget>
     <widget class="QRadioButton" name="extdataRadio">
      <property name="geometry">
       <rect>
-       <x>90</x>
-       <y>20</y>
-       <width>81</width>
+       <x>80</x>
+       <y>50</y>
+       <width>71</width>
        <height>20</height>
       </rect>
      </property>
@@ -387,9 +286,9 @@
     <widget class="QPushButton" name="switchModeButton">
      <property name="geometry">
       <rect>
-       <x>180</x>
-       <y>0</y>
-       <width>131</width>
+       <x>170</x>
+       <y>40</y>
+       <width>141</width>
        <height>51</height>
       </rect>
      </property>
@@ -397,6 +296,45 @@
       <string>Switch to Download</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="selectPreviousGameIDsButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>0</y>
+       <width>311</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>.AppleSystemUIFont</family>
+       <pointsize>12</pointsize>
+       <italic>false</italic>
+      </font>
+     </property>
+     <property name="text">
+      <string>Game ID Menu</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QLabel" name="citraholdLogo">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>-1000</y>
+      <width>341</width>
+      <height>200</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap resource="banner.qrc">:/banner/citraholdminibanner.png</pixmap>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -404,12 +342,30 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>371</width>
+     <width>361</width>
      <height>24</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+    <addaction name="aboutCitraholdOption"/>
+    <addaction name="openConfigFolderOption"/>
+   </widget>
+   <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="aboutCitraholdOption">
+   <property name="text">
+    <string>Information</string>
+   </property>
+  </action>
+  <action name="openConfigFolderOption">
+   <property name="text">
+    <string>Open Config Folder</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="banner.qrc"/>

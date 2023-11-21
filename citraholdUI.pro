@@ -10,16 +10,22 @@ CONFIG += c++17
 
 SOURCES += \
     CitraholdServer.cpp \
+    about.cpp \
+    gameidmanager.cpp \
     main.cpp \
     mainwindow.cpp \
     ConfigManager.cpp
 
 HEADERS += \
     CitraholdServer.h \
+    about.h \
+    gameidmanager.h \
     mainwindow.h \
     ConfigManager.h
 
 FORMS += \
+    about.ui \
+    gameidmanager.ui \
     mainwindow.ui
 
 # Default rules for deployment.
@@ -37,6 +43,6 @@ RESOURCES += \
 TARGET = Citrahold
 TEMPLATE = app
 
-VERSION = 1.0.0
+VERSION = 1.0.1
 
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"

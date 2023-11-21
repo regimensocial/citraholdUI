@@ -43,8 +43,7 @@ private:
     QString token;
     QNetworkAccessManager *networkManager;
 
-    void setTokenFromString(QString token); //
-    // internal use only
+    void setTokenFromString(QString token);
     responsePair sendRequest(QString address, QJsonObject* dataToSend = nullptr, QString* downloadPath = nullptr); //
 
 };

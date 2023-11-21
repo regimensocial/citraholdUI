@@ -30,6 +30,7 @@ public:
     QString getConfigProperty(QString property);
 
     void addEntryToGameIDFile(UploadType type, QString gameID, QString gameName);
+    void removeEntryFromGameIDFile(UploadType type, QString gameID);
 
     QJsonDocument getConfig();
     QString getToken();
