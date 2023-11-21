@@ -47,3 +47,8 @@ TEMPLATE = app
 VERSION = 1.0.1
 
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+
+# Select ARM build in Creator!!
+QMAKE_APPLE_DEVICE_ARCHS += \
+    x86_64 \
+    arm64
