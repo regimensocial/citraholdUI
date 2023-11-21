@@ -90,8 +90,13 @@ void GameIDManager::setUploadType(UploadType uploadType, bool ignoreOther)
 
 void GameIDManager::handleSaveExtdataRadios()
 {
-    if (!this->isHidden() && (!(ui->directoryText->toPlainText().isEmpty() || ui->directoryText->toPlainText() == QString::fromStdString(this->configManager->getLikelyCitraDirectory(UploadType::SAVES).u8string()) || ui->directoryText->toPlainText() == QString::fromStdString(this->configManager->getLikelyCitraDirectory(UploadType::EXTDATA).u8string())) &&
-        (ui->directoryText->toPlainText()).contains("extdata") && uploadType == UploadType::EXTDATA))
+    if (
+        !this->isHidden()
+         && ((
+            !ui->directoryText->toPlainText().isEmpty() && 
+            ui->directoryText->toPlainText() != QString::fromStdString(this->configManager->getLikelyCitraDirectory(UploadType::SAVES).u8string()) &&
+            ui->directoryText->toPlainText() != QString::fromStdString(this->configManager->getLikelyCitraDirectory(UploadType::EXTDATA).u8string())) &&
+        ui->directoryText->toPlainText().contains("extdata") && uploadType == UploadType::EXTDATA))
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this, "Extdata Detected", "This might be extdata. Would you like to switch to extdata mode?", QMessageBox::Yes | QMessageBox::No);
