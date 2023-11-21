@@ -213,7 +213,15 @@ void GameIDManager::addGameIDToFile(bool existing)
 
     this->configManager->addEntryToGameIDFile(uploadType, gameID, directory);
 
-    QMessageBox::information(this, "Success", gameID + " successfully " + (existing ? "updated in " : "added to ") + (uploadType == UploadType::SAVES ? "saves" : "extdata") + ".");
+    QString message = gameID + " successfully " + (existing ? "updated in " : "added to ") + (uploadType == UploadType::SAVES ? "saves" : "extdata") + ".";
+    QMessageBox::information(this, "Success", message);
+
+    QMessageBox::StandardButton reply = QMessageBox::question(this, "Close Game ID Menu", "Should Game ID Menu be closed now?", QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::Yes)
+    {
+        this->close();
+        return;
+    }
 
     ui->gameIDText->setPlainText("");
     resetDirectory(false);
