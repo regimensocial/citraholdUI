@@ -227,7 +227,6 @@ void GameIDManager::addGameIDToFile(bool existing)
     if (reply == QMessageBox::Yes)
     {
         this->close();
-        return;
     }
 
     ui->gameIDText->setPlainText("");
