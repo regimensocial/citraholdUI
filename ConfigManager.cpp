@@ -292,6 +292,49 @@ std::filesystem::path ConfigManager::getGamePathFromGameID(UploadType type, QStr
     return "";
 }
 
+QDateTime ConfigManager::getLastUploadTime(UploadType type, QString gameID) {
+    QJsonObject gameIDFileAsObject = getGameIDFile(type).object();
+
+    QJsonArray gameIDArray = gameIDFileAsObject["gameID"].toArray();
+
+    for (int i = 0; i < gameIDArray.size(); ++i)
+    {
+        QJsonValue value = gameIDArray.at(i);
+        if (gameID == value[0].toString())
+        {
+            return QDateTime::fromString(value[2].toString(), Qt::ISODate);
+        }
+    }
+
+    return QDateTime::fromString("1970-01-01T00:00:00", Qt::ISODate);
+}
+
+void ConfigManager::setLastUploadTime(UploadType type, QString gameID, QDateTime time) {
+    QJsonDocument gameIDFile = getGameIDFile(type);
+
+    QJsonArray gameIDArray = gameIDFile["gameID"].toArray();
+
+    for (int i = 0; i < gameIDArray.size(); ++i)
+    {
+        QJsonValue value = gameIDArray.at(i);
+        if (gameID == value[0].toString())
+        {
+            QJsonArray newEntry;
+            newEntry.append(value[0].toString());
+            newEntry.append(value[1].toString());
+            newEntry.append(time.toString(Qt::ISODate));
+
+            gameIDArray.replace(i, newEntry);
+            break;
+        }
+    }
+
+    QJsonObject gameIDFileAsObject = gameIDFile.object();
+    gameIDFileAsObject["gameID"] = gameIDArray;
+    gameIDFile = QJsonDocument(gameIDFileAsObject);
+    updateGameIDFile(type, gameIDFile);
+}
+
 QString ConfigManager::getToken()
 {
     return getConfig()["token"].toString();

@@ -35,6 +35,7 @@ private slots:
     void handleToggleModeButton();
     void openConfigFolder();
     void openAboutWindow();
+    void changeLastUploadText();
 
 
 private:

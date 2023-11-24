@@ -23,6 +23,7 @@
 #include <QMessageBox>
 #include <QMap>
 #include <QDesktopServices>
+#include <QDateTime>
 
 #include "gameidmanager.h"
 #include "about.h"
@@ -70,6 +71,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     connect(ui->aboutCitraholdOption, &QAction::triggered, this, &MainWindow::openAboutWindow);
     connect(ui->openConfigFolderOption, &QAction::triggered, this, &MainWindow::openConfigFolder);
+    connect(ui->aboutCitraholdOption, &QAction::triggered, this, &MainWindow::openAboutWindow);
+
+    connect(ui->uploadGameIDComboBox, &QComboBox::currentTextChanged, this, &MainWindow::changeLastUploadText);
 
     QString userID = citraholdServer->verifyTokenToSetUserID(configManager->getToken());
     configManager->userID = userID;
@@ -101,6 +105,21 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::changeLastUploadText()
+{
+    QDateTime lastUploadTime = configManager->getLastUploadTime(MainWindow::savesOrExtdata(), ui->uploadGameIDComboBox->currentText());
+
+    if (lastUploadTime.toString("yyyy") == "1970" || lastUploadTime.toString("yyyy") == "")
+    {
+        ui->lastDeviceUploadLabel->setText("");
+    }
+    else
+    {
+        ui->lastDeviceUploadLabel->setText("Last upload on this device: " + lastUploadTime.toString("dd/MM/yyyy hh:mm:ss"));
+        ui->lastDeviceUploadLabel->setToolTip("day/month/year hour:minute:second");
+    }
+}
+
 void MainWindow::openGameIDSelector()
 {
     gameIDManager->setModal(true);
@@ -120,7 +139,7 @@ void MainWindow::setUploadType(UploadType uploadType, bool ignoreOther)
         ui->saveRadio->setChecked(false);
         ui->extdataRadio->setChecked(true);
     }
-    //////////////////
+    
     retrieveGameIDList();
 
     if (!ignoreOther)
@@ -329,12 +348,14 @@ void MainWindow::retrieveGameIDList(QString gameID)
 void MainWindow::handleUploadButton()
 {
 
+    ui->uploadButton->setEnabled(false);
     QString gameID = ui->uploadGameIDComboBox->currentText();
     QString directory = configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), gameID).string().c_str();
 
     if (gameID.trimmed() == "")
     {
         showErrorBox("Invalid game ID");
+        ui->uploadButton->setEnabled(true);
         return;
     }
 
@@ -372,6 +393,8 @@ void MainWindow::handleUploadButton()
 
     QJsonArray allFilesArray;
 
+    int fileSizes = 0;
+
     for (const QDir &filePath : allFilesFull)
     {
         QFile file(filePath.path());
@@ -379,6 +402,17 @@ void MainWindow::handleUploadButton()
         if (file.open(QIODevice::ReadOnly))
         {
             QByteArray fileData = file.readAll();
+
+            fileSizes += fileData.size();
+
+            // 128 MB limit, but this might be different on the server
+            // TODO: make this configurable??????
+            if (fileSizes > 128000000) {
+                showErrorBox("Your save data is too large to upload.");
+                ui->uploadButton->setEnabled(true);
+                return;
+            }
+
             file.close();
 
             QString base64Data = QString(fileData.toBase64());
@@ -392,12 +426,16 @@ void MainWindow::handleUploadButton()
         else
         {
             qDebug() << "Failed to open file.";
+
+            ui->uploadButton->setEnabled(true);
         }
 
         allFilesRelative.removeFirst();
     }
 
+    qDebug() << "Total file size: " << fileSizes;
     int responseCode = citraholdServer->uploadMultiple(MainWindow::savesOrExtdata(), allFilesArray);
+    qDebug() << "Response code: " << responseCode;
 
     if (responseCode == 201)
     {
@@ -407,12 +445,16 @@ void MainWindow::handleUploadButton()
         configManager->updateConfigProperty("lastUploadedGameID", ui->uploadGameIDComboBox->currentText());
         configManager->updateConfigProperty("lastMode", "UPLOAD");
 
+        configManager->setLastUploadTime(MainWindow::savesOrExtdata(), ui->uploadGameIDComboBox->currentText(), QDateTime::currentDateTime());
+        changeLastUploadText();
         handleServerFetch();
     }
     else
     {
-        MainWindow::showErrorBox("Something went wrong during upload, HTTP " + QString::number(responseCode));
+        showErrorBox("Something went wrong during upload, HTTP " + QString::number(responseCode));
     }
+
+    ui->uploadButton->setEnabled(true);
 }
 
 void MainWindow::handleServerFetch()
@@ -446,12 +488,13 @@ void MainWindow::handleDownloadGameIDMissing()
 
 void MainWindow::handleDownloadButton()
 {
-
+    ui->downloadButton->setEnabled(false);
     QJsonArray gameIDsOnFile = configManager->getGameIDFile(MainWindow::savesOrExtdata())["gameID"].toArray();
 
     if (gameIDsOnFile.size() == 0)
     {
         handleDownloadGameIDMissing();
+        ui->downloadButton->setEnabled(true);
         return;
     }
 
@@ -469,6 +512,7 @@ void MainWindow::handleDownloadButton()
     if (!gameIDpresent)
     {
         handleDownloadGameIDMissing();
+        ui->downloadButton->setEnabled(true);
         return;
     }
     else
@@ -503,7 +547,14 @@ void MainWindow::handleDownloadButton()
         else
         {
             showErrorBox("Something went wrong with the download... ");
+
+            std::filesystem::remove_all(configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()));
+            configManager->copyDirectory(
+                (configManager->getOldSaveDirectory(MainWindow::savesOrExtdata()) / std::filesystem::path((ui->downloadGameIDComboBox->currentText() + "-" + formattedDateTime).toStdString())),
+                configManager->getGamePathFromGameID(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText()));
         }
+
+        ui->downloadButton->setEnabled(true);
         return;
     }
 }

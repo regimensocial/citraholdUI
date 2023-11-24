@@ -8,9 +8,8 @@
 #include <QJsonArray>
 #include <QJsonValue>
 #include <QString>
-#include <QObject>
 #include "CitraholdServer.h"
-
+#include <QDateTime>
 
 class ConfigManager  {
 public:
@@ -36,6 +35,10 @@ public:
     QString getToken();
 
     std::filesystem::path getGamePathFromGameID(UploadType type, QString gameID);
+    QDateTime getLastUploadTime(UploadType type, QString gameID);
+    void setLastUploadTime(UploadType type, QString gameID, QDateTime time);
+
+
     bool copyDirectory(const std::filesystem::path& source, const std::filesystem::path& destination);
 
     QString userID;

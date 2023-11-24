@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QDesktopServices>
 
 GameIDManager::GameIDManager(QWidget *parent, ConfigManager *configManager) : QDialog(parent), ui(new Ui::GameIDManager)
 {
@@ -32,6 +33,8 @@ GameIDManager::GameIDManager(QWidget *parent, ConfigManager *configManager) : QD
     connect(ui->existingDirectoryButton, &QPushButton::clicked, this, [&]
             { handleDirectoryButton(true, true); });
     connect(ui->deleteGameIDButton, &QPushButton::clicked, this, &GameIDManager::handleDeleteExistingGameID);
+    connect(ui->openDirectoryButton, &QPushButton::clicked, this, [&]
+            { QDesktopServices::openUrl(QUrl::fromLocalFile(ui->existingDirectoryText->toPlainText())); });
 
     resetDirectory();
     ui->addGameIDButton->setDisabled(true);
@@ -93,12 +96,11 @@ void GameIDManager::setUploadType(UploadType uploadType, bool ignoreOther)
 void GameIDManager::handleSaveExtdataRadios()
 {
     if (
-        !this->isHidden()
-         && ((
-            !ui->directoryText->toPlainText().isEmpty() && 
-            ui->directoryText->toPlainText() != QString::fromStdString(this->configManager->getLikelyCitraDirectory(UploadType::SAVES).u8string()) &&
-            ui->directoryText->toPlainText() != QString::fromStdString(this->configManager->getLikelyCitraDirectory(UploadType::EXTDATA).u8string())) &&
-        ui->directoryText->toPlainText().contains("extdata") && uploadType == UploadType::EXTDATA))
+        !this->isHidden() && ((
+                                  !ui->directoryText->toPlainText().isEmpty() &&
+                                  ui->directoryText->toPlainText() != QString::fromStdString(this->configManager->getLikelyCitraDirectory(UploadType::SAVES).u8string()) &&
+                                  ui->directoryText->toPlainText() != QString::fromStdString(this->configManager->getLikelyCitraDirectory(UploadType::EXTDATA).u8string())) &&
+                              ui->directoryText->toPlainText().contains("extdata") && uploadType == UploadType::EXTDATA))
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this, "Extdata Detected", "This might be extdata. Would you like to switch to extdata mode?", QMessageBox::Yes | QMessageBox::No);
@@ -161,11 +163,13 @@ void GameIDManager::handleDirectoryButton(bool openSelection, bool existing)
 
 void GameIDManager::handleChangeToNew()
 {
+    bool validDirectory = (ui->directoryText->toPlainText().trimmed() != "" &&
+                           std::filesystem::exists(ui->directoryText->toPlainText().toStdString()) &&
+                           ui->directoryText->toPlainText().trimmed().toStdString() != this->configManager->getLikelyCitraDirectory(uploadType).u8string());
+
     if (
         ui->gameIDText->toPlainText().trimmed() != "" &&
-        ui->directoryText->toPlainText().trimmed() != "" &&
-        std::filesystem::exists(ui->directoryText->toPlainText().toStdString()) &&
-        ui->directoryText->toPlainText().trimmed().toStdString() != this->configManager->getLikelyCitraDirectory(uploadType).u8string())
+        validDirectory)
     {
         ui->addGameIDButton->setDisabled(false);
     }
@@ -282,6 +286,7 @@ void GameIDManager::retrieveGameIDList()
     ui->existingDirectoryButton->setDisabled(ui->gameIDComboBox->count() == 0);
     ui->existingDirectoryText->setDisabled(ui->gameIDComboBox->count() == 0);
     ui->existingGameIDText->setDisabled(ui->gameIDComboBox->count() == 0);
+    ui->openDirectoryButton->setDisabled(ui->gameIDComboBox->count() == 0);
 
     handleExistingGameIDSelection();
 }
@@ -298,7 +303,17 @@ void GameIDManager::handleExistingGameIDSelection()
 
 void GameIDManager::handleChangeToExisting()
 {
-    if ((ui->existingGameIDText->toPlainText().trimmed() != "" && ui->existingGameIDText->toPlainText() != ui->gameIDComboBox->currentText()) || (ui->existingDirectoryText->toPlainText() != ui->directoryText->toPlainText() && (std::filesystem::exists(ui->existingDirectoryText->toPlainText().toStdString()))))
+    bool validDirectory = (ui->existingDirectoryText->toPlainText().trimmed() != "" &&
+                           ui->existingDirectoryText->toPlainText() != ui->directoryText->toPlainText() &&
+                           std::filesystem::exists(ui->existingDirectoryText->toPlainText().toStdString()));
+    
+    ui->openDirectoryButton->setDisabled(!validDirectory);
+
+    if (
+        (
+            ui->existingGameIDText->toPlainText().trimmed() != "" &&
+            ui->existingGameIDText->toPlainText() != ui->gameIDComboBox->currentText()) ||
+        (std::filesystem::exists(ui->existingDirectoryText->toPlainText().toStdString())))
     {
         ui->updateGameIDButton->setDisabled(false);
     }

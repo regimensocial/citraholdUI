@@ -168,6 +168,7 @@ int CitraholdServer::uploadMultiple(UploadType type, QJsonArray files)
     data["multi"] = files;
 
     // this will return a full token
+    qDebug() << "uploading multiple files";
     responsePair response = sendRequest(this->serverAddress + (type == UploadType::SAVES ? "/uploadMultiSaves" : "/uploadMultiExtdata"), &data);
 
     qDebug() << "uploadResponse " << response.first;
@@ -281,7 +282,7 @@ int CitraholdServer::downloadMultiple(UploadType type, QString gameID, std::file
         {
             if (!successfulSoFar)
             {
-                break;
+                return false;
             }
 
             itemNumber++;
@@ -324,7 +325,7 @@ int CitraholdServer::downloadMultiple(UploadType type, QString gameID, std::file
             }
         }
 
-        return successfulSoFar;
+        return response.first;
     }
     return false;
 }
