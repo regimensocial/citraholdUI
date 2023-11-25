@@ -411,12 +411,12 @@ void MainWindow::handleUploadButton()
     QDateTime lastServerUploadTime = citraholdServer->getLastUploadTime(MainWindow::savesOrExtdata(), gameID);
 
     if (
-        (lastUploadTime.toString("yyyy") != "1970" && lastUploadTime.toString("yyyy") != "") && 
-        (lastServerUploadTime.toString("yyyy") != "1970" && lastServerUploadTime.toString("yyyy") != "") && 
-        (lastDownloadTime.toString("yyyy") != "1970" && lastDownloadTime.toString("yyyy") != "")
-    )
-    {   
-        if (lastServerUploadTime > lastDownloadTime) {
+        (lastUploadTime.toString("yyyy") != "1970" && lastUploadTime.toString("yyyy") != "") &&
+        (lastServerUploadTime.toString("yyyy") != "1970" && lastServerUploadTime.toString("yyyy") != "") &&
+        (lastDownloadTime.toString("yyyy") != "1970" && lastDownloadTime.toString("yyyy") != ""))
+    {
+        if (lastServerUploadTime > lastDownloadTime)
+        {
             QMessageBox msgBox;
             QString message = "You have uploaded to the server on a different device, but not downloaded it here.\nIt will overwrite whatever is on the server.\nAre you sure you want to upload?";
             msgBox.setText(tr(message.toStdString().c_str()));
@@ -573,6 +573,7 @@ void MainWindow::handleDownloadGameIDMissing()
 
 void MainWindow::handleDownloadButton()
 {
+
     ui->downloadButton->setEnabled(false);
     QJsonArray gameIDsOnFile = configManager->getGameIDFile(MainWindow::savesOrExtdata())["gameID"].toArray();
 
@@ -602,6 +603,33 @@ void MainWindow::handleDownloadButton()
     }
     else
     {
+
+        QDateTime lastUploadTime = configManager->getLastUploadTime(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText());
+        QDateTime lastDownloadTime = configManager->getLastDownloadTime(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText());
+        QDateTime lastServerUploadTime = citraholdServer->getLastUploadTime(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText());
+
+        if (
+            (lastUploadTime.toString("yyyy") != "1970" && lastUploadTime.toString("yyyy") != "") &&
+            (lastServerUploadTime.toString("yyyy") != "1970" && lastServerUploadTime.toString("yyyy") != "") &&
+            (lastDownloadTime.toString("yyyy") != "1970" && lastDownloadTime.toString("yyyy") != ""))
+        {
+            if (lastDownloadTime > lastServerUploadTime)
+            {
+                QMessageBox msgBox;
+                QString message = "You have already downloaded this save data, are you sure you want to download it again?";
+                msgBox.setText(tr(message.toStdString().c_str()));
+                QAbstractButton *pButtonYes = msgBox.addButton(tr("Yes"), QMessageBox::YesRole);
+                msgBox.addButton(tr("No"), QMessageBox::NoRole);
+
+                msgBox.exec();
+
+                if (msgBox.clickedButton() != pButtonYes)
+                {
+                    ui->downloadButton->setEnabled(true);
+                    return;
+                }
+            }
+        }
 
         QDateTime currentDateTime = QDateTime::currentDateTime();
         QString formattedDateTime = currentDateTime.toString("yyyyMMdd-hhmmss");
