@@ -24,6 +24,7 @@ public:
 private:
     Ui::GameIDManager *ui;
     UploadType uploadType;
+    bool validGameID(QString gameID);
 
 private slots:
     void resetDirectory(bool doubleCheck = false);

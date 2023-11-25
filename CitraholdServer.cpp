@@ -27,6 +27,26 @@ void CitraholdServer::setTokenFromString(QString token)
 
     this->token = token;
 }
+
+QVector<QString> CitraholdServer::getSoftwareVersions()
+{
+    QVector<QString> versions;
+
+    responsePair response = sendRequest(this->serverAddress + "/softwareVersion");
+
+    if (response.first == 200)
+    {
+        QJsonArray versionsArray = response.second["pc"].toArray();
+
+        for (int i = 0; i < versionsArray.size(); ++i)
+        {
+            versions.append(versionsArray.at(i).toString());
+        }
+    }
+
+    return versions;
+}
+
 responsePair CitraholdServer::sendRequest(QString address, QJsonObject *dataToSend, QString *downloadPath)
 {
     QEventLoop eventLoop;
@@ -257,7 +277,6 @@ int CitraholdServer::download(UploadType type, QString gameID, std::filesystem::
 int CitraholdServer::downloadMultiple(UploadType type, QString gameID, std::filesystem::path gamePath)
 {
 
-
     QJsonObject data;
 
     data["token"] = this->token;
@@ -276,7 +295,6 @@ int CitraholdServer::downloadMultiple(UploadType type, QString gameID, std::file
         int itemNumber = 0;
 
         qDebug() << "Retrieved " << numberOfItems << " files\n";
-
 
         for (const QJsonValueRef &element : files)
         {
@@ -321,7 +339,7 @@ int CitraholdServer::downloadMultiple(UploadType type, QString gameID, std::file
             else
             {
                 qDebug() << "[" << itemNumber << "/" << numberOfItems << "] "
-                          << "Ignoring dummy file " << filename << "\n";
+                         << "Ignoring dummy file " << filename << "\n";
             }
         }
 

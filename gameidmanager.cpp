@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDesktopServices>
+#include <QRegularExpression>
 
 GameIDManager::GameIDManager(QWidget *parent, ConfigManager *configManager) : QDialog(parent), ui(new Ui::GameIDManager)
 {
@@ -46,6 +47,12 @@ GameIDManager::GameIDManager(QWidget *parent, ConfigManager *configManager) : QD
 GameIDManager::~GameIDManager()
 {
     delete ui;
+}
+
+bool GameIDManager::validGameID(QString gameID)
+{
+    QRegularExpression regex("^[a-zA-Z0-9_]+$");
+    return (gameID.length() <= 32 && (regex.match(gameID)).hasMatch());
 }
 
 void GameIDManager::resetDirectory(bool doubleCheck)
@@ -169,7 +176,7 @@ void GameIDManager::handleChangeToNew()
 
     if (
         ui->gameIDText->toPlainText().trimmed() != "" &&
-        validDirectory)
+        validDirectory && validGameID(ui->gameIDText->toPlainText().trimmed()))
     {
         ui->addGameIDButton->setDisabled(false);
     }
@@ -306,14 +313,16 @@ void GameIDManager::handleChangeToExisting()
     bool validDirectory = (ui->existingDirectoryText->toPlainText().trimmed() != "" &&
                            ui->existingDirectoryText->toPlainText() != ui->directoryText->toPlainText() &&
                            std::filesystem::exists(ui->existingDirectoryText->toPlainText().toStdString()));
-    
+
     ui->openDirectoryButton->setDisabled(!validDirectory);
 
     if (
         (
             ui->existingGameIDText->toPlainText().trimmed() != "" &&
             ui->existingGameIDText->toPlainText() != ui->gameIDComboBox->currentText()) ||
-        (std::filesystem::exists(ui->existingDirectoryText->toPlainText().toStdString())))
+        (std::filesystem::exists(ui->existingDirectoryText->toPlainText().toStdString()))
+        && validGameID(ui->existingGameIDText->toPlainText().trimmed())
+    )
     {
         ui->updateGameIDButton->setDisabled(false);
     }

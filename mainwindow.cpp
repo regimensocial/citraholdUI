@@ -96,6 +96,32 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     {
         showErrorBox("The server is inaccessible at this time. Please try again later.");
     }
+    else
+    {
+        QStringList versions = citraholdServer->getSoftwareVersions();
+
+        if (!versions.contains("v" + QCoreApplication::applicationVersion())
+            && (configManager->getConfigProperty("ignoreVersion") != versions[0])
+        )
+        {
+            QMessageBox msgBox;
+            QString message = "There is a new version of Citrahold PC available (" + versions[0] + "). Would you like to download it?";
+            msgBox.setText(tr(message.toStdString().c_str()));
+            QAbstractButton *pButtonYes = msgBox.addButton(tr("Yes"), QMessageBox::YesRole);
+            msgBox.addButton(tr("Not now"), QMessageBox::NoRole);
+            QAbstractButton *pButtonIgnore = msgBox.addButton(tr("Don't remind me"), QMessageBox::NoRole);
+
+            msgBox.exec();
+
+            if (msgBox.clickedButton() == pButtonYes)
+            {
+                QDesktopServices::openUrl(QUrl("https://github.com/regimensocial/citraholdUI/releases/latest"));
+            } else if (msgBox.clickedButton() == pButtonIgnore)
+            {
+                configManager->updateConfigProperty("ignoreVersion", versions[0]);
+            }
+        }
+    }
 
     retrieveGameIDList();
 }
@@ -139,7 +165,7 @@ void MainWindow::setUploadType(UploadType uploadType, bool ignoreOther)
         ui->saveRadio->setChecked(false);
         ui->extdataRadio->setChecked(true);
     }
-    
+
     retrieveGameIDList();
 
     if (!ignoreOther)
@@ -405,15 +431,16 @@ void MainWindow::handleUploadButton()
 
             fileSizes += fileData.size();
 
+            file.close();
+
             // 128 MB limit, but this might be different on the server
             // TODO: make this configurable??????
-            if (fileSizes > 128000000) {
+            if (fileSizes > 128000000)
+            {
                 showErrorBox("Your save data is too large to upload.");
                 ui->uploadButton->setEnabled(true);
                 return;
             }
-
-            file.close();
 
             QString base64Data = QString(fileData.toBase64());
 

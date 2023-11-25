@@ -7,6 +7,8 @@
 #include <QObject>
 #include <QVector>
 #include <QHash>
+#include <QVector>
+#include <QString>
 #include <filesystem>
 
 using responsePair = std::pair<int, QJsonDocument>;
@@ -32,6 +34,8 @@ public:
     QVector<QString> serverGameIDExtdata;
 
     bool checkServerIsOnline();
+
+    QVector<QString> getSoftwareVersions();
 
     int upload(UploadType type, QString filePath, QString base64Data);
     int uploadMultiple(UploadType type, QJsonArray files);
