@@ -10,6 +10,7 @@
 #include <QVector>
 #include <QString>
 #include <filesystem>
+#include <QDateTime>
 
 using responsePair = std::pair<int, QJsonDocument>;
 
@@ -32,6 +33,8 @@ public:
 
     QVector<QString> serverGameIDSaves;
     QVector<QString> serverGameIDExtdata;
+
+    QDateTime getLastUploadTime(UploadType type, QString gameID);
 
     bool checkServerIsOnline();
 

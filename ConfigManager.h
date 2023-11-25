@@ -11,7 +11,8 @@
 #include "CitraholdServer.h"
 #include <QDateTime>
 
-class ConfigManager  {
+class ConfigManager
+{
 public:
     ConfigManager();
 
@@ -38,13 +39,14 @@ public:
     QDateTime getLastUploadTime(UploadType type, QString gameID);
     void setLastUploadTime(UploadType type, QString gameID, QDateTime time);
 
+    QDateTime getLastDownloadTime(UploadType type, QString gameID);
+    void setLastDownloadTime(UploadType type, QString gameID, QDateTime time);
 
-    bool copyDirectory(const std::filesystem::path& source, const std::filesystem::path& destination);
+    bool copyDirectory(const std::filesystem::path &source, const std::filesystem::path &destination);
 
     QString userID;
 
     bool loggedIn();
-
 
 private:
     std::filesystem::path saveDirectory;

@@ -378,3 +378,22 @@ void CitraholdServer::updateServerGameIDVariables()
         }
     }
 }
+
+QDateTime CitraholdServer::getLastUploadTime(UploadType type, QString gameID)
+{
+    QJsonObject data;
+
+    data["token"] = this->token;
+    data["game"] = gameID;
+
+    responsePair response = sendRequest(this->serverAddress + (type == UploadType::SAVES ? "/getSavesLastUpdated" : "/getExtdataLastUpdated"), &data);
+
+    if (response.first == 200)
+    {
+        return QDateTime::fromString(response.second["lastModified"].toString(), Qt::ISODate);
+    }
+    else
+    {
+        return QDateTime();
+    }
+}

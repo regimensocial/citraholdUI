@@ -36,6 +36,8 @@ private slots:
     void openConfigFolder();
     void openAboutWindow();
     void changeLastUploadText();
+    void changeLastDownloadText();
+    void changeLastServerUploadText(bool upload);
 
 
 private:

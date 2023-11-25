@@ -73,7 +73,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->openConfigFolderOption, &QAction::triggered, this, &MainWindow::openConfigFolder);
     connect(ui->aboutCitraholdOption, &QAction::triggered, this, &MainWindow::openAboutWindow);
 
-    connect(ui->uploadGameIDComboBox, &QComboBox::currentTextChanged, this, &MainWindow::changeLastUploadText);
+    connect(ui->uploadGameIDComboBox, &QComboBox::currentTextChanged, this, [&]
+            { MainWindow::changeLastUploadText ();
+            MainWindow::changeLastServerUploadText(true); });
+
+    connect(ui->downloadGameIDComboBox, &QComboBox::currentTextChanged, this, [&]
+            {
+        MainWindow::changeLastDownloadText();
+        MainWindow::changeLastServerUploadText(false); });
 
     QString userID = citraholdServer->verifyTokenToSetUserID(configManager->getToken());
     configManager->userID = userID;
@@ -100,9 +107,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     {
         QStringList versions = citraholdServer->getSoftwareVersions();
 
-        if (!versions.contains("v" + QCoreApplication::applicationVersion())
-            && (configManager->getConfigProperty("ignoreVersion") != versions[0])
-        )
+        if (!versions.contains("v" + QCoreApplication::applicationVersion()) && (configManager->getConfigProperty("ignoreVersion") != versions[0]))
         {
             QMessageBox msgBox;
             QString message = "There is a new version of Citrahold PC available (" + versions[0] + "). Would you like to download it?";
@@ -116,7 +121,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             if (msgBox.clickedButton() == pButtonYes)
             {
                 QDesktopServices::openUrl(QUrl("https://github.com/regimensocial/citraholdUI/releases/latest"));
-            } else if (msgBox.clickedButton() == pButtonIgnore)
+            }
+            else if (msgBox.clickedButton() == pButtonIgnore)
             {
                 configManager->updateConfigProperty("ignoreVersion", versions[0]);
             }
@@ -143,6 +149,21 @@ void MainWindow::changeLastUploadText()
     {
         ui->lastDeviceUploadLabel->setText("Last upload on this device: " + lastUploadTime.toString("dd/MM/yyyy hh:mm:ss"));
         ui->lastDeviceUploadLabel->setToolTip("day/month/year hour:minute:second");
+    }
+}
+
+void MainWindow::changeLastDownloadText()
+{
+    QDateTime lastDownloadTime = configManager->getLastDownloadTime(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText());
+
+    if (lastDownloadTime.toString("yyyy") == "1970" || lastDownloadTime.toString("yyyy") == "")
+    {
+        ui->lastDeviceDownloadLabel->setText("");
+    }
+    else
+    {
+        ui->lastDeviceDownloadLabel->setText("Last download on this device: " + lastDownloadTime.toString("dd/MM/yyyy hh:mm:ss"));
+        ui->lastDeviceDownloadLabel->setToolTip("day/month/year hour:minute:second");
     }
 }
 
@@ -385,6 +406,33 @@ void MainWindow::handleUploadButton()
         return;
     }
 
+    QDateTime lastUploadTime = configManager->getLastUploadTime(MainWindow::savesOrExtdata(), gameID);
+    QDateTime lastDownloadTime = configManager->getLastDownloadTime(MainWindow::savesOrExtdata(), gameID);
+    QDateTime lastServerUploadTime = citraholdServer->getLastUploadTime(MainWindow::savesOrExtdata(), gameID);
+
+    if (
+        (lastUploadTime.toString("yyyy") != "1970" && lastUploadTime.toString("yyyy") != "") && 
+        (lastServerUploadTime.toString("yyyy") != "1970" && lastServerUploadTime.toString("yyyy") != "") && 
+        (lastDownloadTime.toString("yyyy") != "1970" && lastDownloadTime.toString("yyyy") != "")
+    )
+    {   
+        if (lastServerUploadTime > lastDownloadTime) {
+            QMessageBox msgBox;
+            QString message = "You have uploaded to the server on a different device, but not downloaded it here.\nIt will overwrite whatever is on the server.\nAre you sure you want to upload?";
+            msgBox.setText(tr(message.toStdString().c_str()));
+            QAbstractButton *pButtonYes = msgBox.addButton(tr("Yes"), QMessageBox::YesRole);
+            msgBox.addButton(tr("No"), QMessageBox::NoRole);
+
+            msgBox.exec();
+
+            if (msgBox.clickedButton() != pButtonYes)
+            {
+                ui->uploadButton->setEnabled(true);
+                return;
+            }
+        }
+    }
+
     QQueue<QDir> directoriesToVisit;
     directoriesToVisit.enqueue(directory);
 
@@ -472,8 +520,11 @@ void MainWindow::handleUploadButton()
         configManager->updateConfigProperty("lastUploadedGameID", ui->uploadGameIDComboBox->currentText());
         configManager->updateConfigProperty("lastMode", "UPLOAD");
 
-        configManager->setLastUploadTime(MainWindow::savesOrExtdata(), ui->uploadGameIDComboBox->currentText(), QDateTime::currentDateTime());
+        QDateTime currentDateTime = citraholdServer->getLastUploadTime(MainWindow::savesOrExtdata(), ui->uploadGameIDComboBox->currentText());
+        configManager->setLastUploadTime(MainWindow::savesOrExtdata(), ui->uploadGameIDComboBox->currentText(), currentDateTime);
+        configManager->setLastDownloadTime(MainWindow::savesOrExtdata(), ui->uploadGameIDComboBox->currentText(), currentDateTime.addSecs(1));
         changeLastUploadText();
+
         handleServerFetch();
     }
     else
@@ -503,6 +554,13 @@ void MainWindow::handleServerFetch()
     if (ui->downloadGameIDComboBox->findText(previousGameID) != -1)
     {
         ui->downloadGameIDComboBox->setCurrentText(previousGameID);
+    }
+
+    changeLastServerUploadText(true);
+
+    if (ui->uploadGameIDComboBox->currentText() == ui->downloadGameIDComboBox->currentText())
+    {
+        changeLastServerUploadText(false);
     }
 }
 
@@ -570,6 +628,15 @@ void MainWindow::handleDownloadButton()
             configManager->updateConfigProperty("lastType", (savesOrExtdata() == UploadType::SAVES ? "SAVES" : "EXTDATA"));
             configManager->updateConfigProperty("lastDownloadedGameID", ui->downloadGameIDComboBox->currentText());
             configManager->updateConfigProperty("lastMode", "DOWNLOAD");
+            configManager->setLastDownloadTime(MainWindow::savesOrExtdata(), ui->downloadGameIDComboBox->currentText(), QDateTime::currentDateTime());
+            changeLastServerUploadText(false);
+
+            if (ui->uploadGameIDComboBox->currentText() == ui->downloadGameIDComboBox->currentText())
+            {
+                changeLastServerUploadText(true);
+            }
+
+            changeLastDownloadText();
         }
         else
         {
@@ -609,4 +676,30 @@ void MainWindow::openAboutWindow()
 void MainWindow::openConfigFolder()
 {
     QDesktopServices::openUrl(QUrl::fromLocalFile(configManager->getSaveDirectory().string().c_str()));
+}
+
+void MainWindow::changeLastServerUploadText(bool upload)
+{
+
+    QComboBox *comboBox = upload ? ui->uploadGameIDComboBox : ui->downloadGameIDComboBox;
+    QLabel *label = upload ? ui->uploadLastUploadedLabel : ui->downloadLastUploadedLabel;
+
+    QString gameID = comboBox->currentText();
+
+    if (gameID == "")
+    {
+        return;
+    }
+
+    QDateTime lastUploadTime = citraholdServer->getLastUploadTime(MainWindow::savesOrExtdata(), gameID);
+
+    if (lastUploadTime.toString("yyyy") == "1970" || lastUploadTime.toString("yyyy") == "")
+    {
+        label->setText("");
+    }
+    else
+    {
+        label->setText("Last upload on server: " + lastUploadTime.toString("dd/MM/yyyy hh:mm:ss"));
+        label->setToolTip("day/month/year hour:minute:second");
+    }
 }

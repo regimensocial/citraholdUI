@@ -320,8 +320,8 @@ void GameIDManager::handleChangeToExisting()
         (
             ui->existingGameIDText->toPlainText().trimmed() != "" &&
             ui->existingGameIDText->toPlainText() != ui->gameIDComboBox->currentText()) ||
-        (std::filesystem::exists(ui->existingDirectoryText->toPlainText().toStdString()))
-        && validGameID(ui->existingGameIDText->toPlainText().trimmed())
+        ((std::filesystem::exists(ui->existingDirectoryText->toPlainText().toStdString()))
+            && validGameID(ui->existingGameIDText->toPlainText().trimmed()))
     )
     {
         ui->updateGameIDButton->setDisabled(false);

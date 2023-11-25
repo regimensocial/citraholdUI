@@ -35,7 +35,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="loginWidget">
      <widget class="QLabel" name="label_2">
@@ -179,6 +179,25 @@
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
+     <widget class="QLabel" name="uploadLastUploadedLabel">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>100</y>
+        <width>281</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>.AppleSystemUIFont</family>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Last uploaded to server</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="downloadWidget">
      <widget class="QPushButton" name="downloadButton">
@@ -264,6 +283,48 @@
       </property>
       <property name="text">
        <string>Download a save below.</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lastDeviceDownloadLabel">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>230</y>
+        <width>361</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>.AppleSystemUIFont</family>
+        <pointsize>11</pointsize>
+        <italic>false</italic>
+       </font>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="downloadLastUploadedLabel">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>145</y>
+        <width>281</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>.AppleSystemUIFont</family>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Last uploaded to server</string>
       </property>
      </widget>
     </widget>
