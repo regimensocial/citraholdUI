@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>361</width>
-    <height>398</height>
+    <height>431</height>
    </rect>
   </property>
   <property name="font">
@@ -204,7 +204,7 @@
       <property name="geometry">
        <rect>
         <x>40</x>
-        <y>160</y>
+        <y>180</y>
         <width>301</width>
         <height>71</height>
        </rect>
@@ -289,7 +289,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>230</y>
+        <y>250</y>
         <width>361</width>
         <height>21</height>
        </rect>
@@ -312,7 +312,7 @@
       <property name="geometry">
        <rect>
         <x>50</x>
-        <y>145</y>
+        <y>150</y>
         <width>281</width>
         <height>16</height>
        </rect>
@@ -427,7 +427,7 @@
      <x>0</x>
      <y>0</y>
      <width>361</width>
-     <height>24</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAbout">

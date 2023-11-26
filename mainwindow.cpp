@@ -129,6 +129,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         }
     }
 
+#ifdef _WIN32
+    // Windows only
+
+    QFont font;
+    font.setPointSize(8);
+
+    ui->downloadLastUploadedLabel->setFont(font);
+    ui->uploadLastUploadedLabel->setFont(font);
+    ui->lastDeviceUploadLabel->setFont(font);
+    ui->lastDeviceDownloadLabel->setFont(font);
+#endif
+
     retrieveGameIDList();
 }
 
