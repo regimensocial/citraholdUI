@@ -616,7 +616,7 @@ void MainWindow::handleDownloadButton()
             if (lastDownloadTime > lastServerUploadTime)
             {
                 QMessageBox msgBox;
-                QString message = "You have already downloaded this save data, are you sure you want to download it again?";
+                QString message = "You've already downloaded this save.\nAre you sure you want to download it again? It will overwrite any changes you've made.";
                 msgBox.setText(tr(message.toStdString().c_str()));
                 QAbstractButton *pButtonYes = msgBox.addButton(tr("Yes"), QMessageBox::YesRole);
                 msgBox.addButton(tr("No"), QMessageBox::NoRole);
