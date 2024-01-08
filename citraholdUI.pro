@@ -1,4 +1,4 @@
-QT       += core gui network widgets
+QT       += core gui network widgets httpserver
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -43,7 +43,7 @@ RESOURCES += \
 TARGET = Citrahold
 TEMPLATE = app
 
-VERSION = 1.1.0
+VERSION = 1.1.1
 
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
