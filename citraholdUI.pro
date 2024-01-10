@@ -14,19 +14,22 @@ SOURCES += \
     gameidmanager.cpp \
     main.cpp \
     mainwindow.cpp \
-    ConfigManager.cpp
+    ConfigManager.cpp \
+    settingsmenu.cpp
 
 HEADERS += \
     CitraholdServer.h \
     about.h \
     gameidmanager.h \
     mainwindow.h \
-    ConfigManager.h
+    ConfigManager.h \
+    settingsmenu.h
 
 FORMS += \
     about.ui \
     gameidmanager.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    settingsmenu.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

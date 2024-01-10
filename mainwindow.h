@@ -6,6 +6,7 @@
 #include <QNetworkAccessManager>
 #include "CitraholdServer.h"
 #include "gameidmanager.h"
+#include "settingsmenu.h"
 #include "about.h"
 
 QT_BEGIN_NAMESPACE
@@ -38,13 +39,14 @@ private slots:
     void changeLastUploadText();
     void changeLastDownloadText();
     void changeLastServerUploadText(bool upload);
-
+    void openSettings();
 
 private:
     Ui::MainWindow *ui;
     ConfigManager *configManager;
     CitraholdServer *citraholdServer;
     GameIDManager *gameIDManager;
+    SettingsMenu *settingsMenu;
     About *aboutWindow;
 
     void handleSuccessfulLogin();

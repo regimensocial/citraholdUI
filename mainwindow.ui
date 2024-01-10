@@ -35,7 +35,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="loginWidget">
      <widget class="QLabel" name="label_2">
@@ -196,6 +196,24 @@
       </property>
       <property name="text">
        <string>Last uploaded to server</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="serverWidget">
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>40</y>
+        <width>301</width>
+        <height>81</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>You are using Citrahold local server. Other devices will send and receive files for you to receive.</string>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
       </property>
      </widget>
     </widget>
@@ -427,7 +445,7 @@
      <x>0</x>
      <y>0</y>
      <width>361</width>
-     <height>20</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAbout">
@@ -436,6 +454,7 @@
     </property>
     <addaction name="aboutCitraholdOption"/>
     <addaction name="openConfigFolderOption"/>
+    <addaction name="openSettingsOption"/>
    </widget>
    <addaction name="menuAbout"/>
   </widget>
@@ -448,6 +467,11 @@
   <action name="openConfigFolderOption">
    <property name="text">
     <string>Open Config Folder</string>
+   </property>
+  </action>
+  <action name="openSettingsOption">
+   <property name="text">
+    <string>Open Settings</string>
    </property>
   </action>
  </widget>
