@@ -61,7 +61,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="clientToLocalServerPage">
     <widget class="QPlainTextEdit" name="localServerClientPortText">
@@ -74,7 +74,7 @@
       </rect>
      </property>
      <property name="plainText">
-      <string>443</string>
+      <string>29170</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_6">
@@ -100,7 +100,7 @@
       </rect>
      </property>
      <property name="plainText">
-      <string>https://api.citrahold.com</string>
+      <string>192.168.0.0</string>
      </property>
     </widget>
     <widget class="QPushButton" name="verifyLocalServerButton">
@@ -147,12 +147,12 @@
       <rect>
        <x>10</x>
        <y>0</y>
-       <width>261</width>
+       <width>291</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>You are connecting to a central server.</string>
+      <string>You are connecting to a server on your network.</string>
      </property>
     </widget>
    </widget>
@@ -167,7 +167,7 @@
       </rect>
      </property>
      <property name="plainText">
-      <string/>
+      <string>https://api.citrahold.com</string>
      </property>
     </widget>
     <widget class="QPlainTextEdit" name="centralServerPortText">
@@ -180,7 +180,7 @@
       </rect>
      </property>
      <property name="plainText">
-      <string>29170</string>
+      <string>443</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_2">
@@ -245,7 +245,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>You are connecting to a server on your network.</string>
+      <string>You are connecting to a server on the internet.</string>
      </property>
     </widget>
    </widget>
@@ -260,7 +260,7 @@
       </rect>
      </property>
      <property name="plainText">
-      <string/>
+      <string>29170</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_4">
