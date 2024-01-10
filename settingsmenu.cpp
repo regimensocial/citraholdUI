@@ -4,20 +4,30 @@
 #include <QDebug>
 #include <QHostAddress>
 #include <QNetworkInterface>
+#include "InternalServer.h"
 
-SettingsMenu::SettingsMenu(QWidget *parent)
+SettingsMenu::SettingsMenu(QWidget *parent, InternalServer *internalServer)
     : QDialog(parent), ui(new Ui::SettingsMenu) {
     ui->setupUi(this);
 
     connect(ui->roleComboBox, &QComboBox::currentTextChanged, this,
             &SettingsMenu::roleComboBoxChange);
 
+    connect(ui->saveButton, &QPushButton::clicked, this,
+            &SettingsMenu::handleSaveButton);
+
+    connect(ui->cancelButton, &QPushButton::clicked, this,
+            &SettingsMenu::handleCancelButton);
+
+    connect(ui->testLocalServerButton, &QPushButton::clicked, this,
+            &SettingsMenu::handleLocalServerTestButton);    
+
     // for now, later we will load the settings from a config file
     ui->roleComboBox->setCurrentIndex(0);
     ui->stackedWidget->setCurrentWidget(ui->clientToCentralServerPage);
 
-    // test what this does when offline
-    
+    // need to test what this does when offline
+
     const QHostAddress &localhost = QHostAddress(QHostAddress::LocalHost);
     for (const QHostAddress &address : QNetworkInterface::allAddresses()) {
         if (address.protocol() == QAbstractSocket::IPv4Protocol &&
@@ -26,15 +36,23 @@ SettingsMenu::SettingsMenu(QWidget *parent)
                                         address.toString() + ".");
         }
     }
+    
+    ui->saveButton->setEnabled(false);
+
+    this->internalServer = internalServer;
 
     // privateIPLabel
 }
 
 // general
 
-void SettingsMenu::handleSaveButton() {}
+void SettingsMenu::handleSaveButton() {
 
-void SettingsMenu::handleCancelButton() {}
+}
+
+void SettingsMenu::handleCancelButton() {
+    // TODO: reset all values to what they were before
+}
 
 void SettingsMenu::roleComboBoxChange() {
     int currentIndex = ui->roleComboBox->currentIndex();
@@ -70,7 +88,9 @@ void SettingsMenu::handleLocalServerPortChange() {}
 
 void SettingsMenu::handleLocalServerToggle() {}
 
-void SettingsMenu::handleLocalServerTestButton() {}
+void SettingsMenu::handleLocalServerTestButton() {
+    internalServer->startServer();
+}
 
 void SettingsMenu::handleLocalServerPortResetButton() {}
 

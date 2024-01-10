@@ -61,7 +61,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>2</number>
    </property>
    <widget class="QWidget" name="clientToLocalServerPage">
     <widget class="QPlainTextEdit" name="localServerClientPortText">
@@ -356,7 +356,7 @@
     </widget>
    </widget>
   </widget>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="saveButton">
    <property name="geometry">
     <rect>
      <x>260</x>
@@ -369,7 +369,7 @@
     <string>Save</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_2">
+  <widget class="QPushButton" name="cancelButton">
    <property name="geometry">
     <rect>
      <x>40</x>

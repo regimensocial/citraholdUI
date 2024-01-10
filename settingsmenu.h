@@ -2,6 +2,7 @@
 #define SETTINGSMENU_H
 
 #include <QDialog>
+#include "InternalServer.h"
 
 namespace Ui {
 class SettingsMenu;
@@ -12,7 +13,7 @@ class SettingsMenu : public QDialog
     Q_OBJECT
 
 public:
-    explicit SettingsMenu(QWidget *parent = nullptr);
+    explicit SettingsMenu(QWidget *parent = nullptr, InternalServer *internalServer = nullptr);
     ~SettingsMenu();
 
 private slots:
@@ -41,6 +42,8 @@ private slots:
 
 private:
     Ui::SettingsMenu *ui;
+    InternalServer *internalServer;
+    bool areChangesVerified = false;
 };
 
 #endif // SETTINGSMENU_H

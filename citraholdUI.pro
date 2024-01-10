@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     CitraholdServer.cpp \
+    InternalServer.cpp \
     about.cpp \
     gameidmanager.cpp \
     main.cpp \
@@ -19,6 +20,7 @@ SOURCES += \
 
 HEADERS += \
     CitraholdServer.h \
+    InternalServer.h \
     about.h \
     gameidmanager.h \
     mainwindow.h \

@@ -27,6 +27,7 @@
 #include "about.h"
 #include "gameidmanager.h"
 #include "settingsmenu.h"
+#include "InternalServer.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -38,8 +39,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->setupUi(this);
 
+    InternalServer *internalServer = new InternalServer();
+
     gameIDManager = new GameIDManager(this, configManager);
-    settingsMenu = new SettingsMenu(this);
+    settingsMenu = new SettingsMenu(this, internalServer);
     aboutWindow = new About(this);
 
     ui->statusbar->showMessage("Not logged in.");

@@ -5,6 +5,7 @@
 #include "ConfigManager.h"
 #include <QNetworkAccessManager>
 #include "CitraholdServer.h"
+#include "InternalServer.h"
 #include "gameidmanager.h"
 #include "settingsmenu.h"
 #include "about.h"
@@ -48,6 +49,7 @@ private:
     GameIDManager *gameIDManager;
     SettingsMenu *settingsMenu;
     About *aboutWindow;
+    InternalServer *internalServer;
 
     void handleSuccessfulLogin();
     void openGameIDSelector();

@@ -1,3 +1,10 @@
+/*
+
+This class is CitraholdServer, a way to communicate with a server for if the software is being used as a client.
+This might need a refactor to change some names soon
+
+*/
+
 #include "CitraholdServer.h"
 #include "QtCore/qjsonarray.h"
 #include <QNetworkRequest>
